@@ -1,0 +1,118 @@
+#include <string>
+#include <vector>
+#include <iostream>
+
+
+using namespace std;
+
+string step1(string &new_id){    
+    string result = "";
+    for(int i = 0;i<new_id.size();i++){
+        if(new_id[i] >= 'A' && new_id[i] <= 'Z'){
+            new_id[i] = tolower(new_id[i]);
+        }
+    }    
+    result = new_id;
+    return result;
+}
+
+string step2(string &new_id){
+    string result = "";
+    for(int i = 0;i<new_id.size();i++){
+        if(new_id[i] >= 'a' && new_id[i] <= 'z'){
+            result.push_back(new_id[i]);
+        }
+        else if(new_id[i] >= '0' && new_id[i] <= '9'){
+            result.push_back(new_id[i]);
+        }
+        else if(new_id[i] == '-' || new_id[i] == '_' || new_id[i] == '.'){
+            result.push_back(new_id[i]);
+        }
+        else{            
+            
+        }
+    }    
+    
+    return result;    
+}
+
+string step3(string &new_id){
+    string result = "";
+    for(int i = 0;i<new_id.size();i++){
+        if(new_id[i] == '.' && i + 1 < new_id.size() && new_id[i + 1] == '.'){
+            
+        }
+        else{
+            result.push_back(new_id[i]);
+        }
+    }        
+    
+    return result;    
+}
+
+
+string step4(string &new_id){
+    string result = "";
+    result = new_id;
+    
+    if(result[result.size() - 1] == '.'){
+        result.erase(result.size() - 1, 1);
+    }
+    
+    if(result[0] == '.'){
+        result.erase(0, 1);
+    }
+    
+    return result; 
+}
+
+string step5(string &new_id){
+    string result = "";
+    if(new_id == ""){
+        new_id.push_back('a');
+    }
+    result = new_id;
+    
+    return result;     
+}
+
+string step6(string &new_id){
+    string result = new_id;
+    if(new_id.size() >= 16){
+        result = "";
+        for(int i = 0;i<15;i++){
+            result.push_back(new_id[i]);
+        }
+    }
+    
+    return result;
+}
+
+string step7(string &new_id){
+    string result = new_id;
+    while(result.size()<3){
+        char end_char = result[result.size() - 1];
+        result.push_back(end_char);
+    }
+    
+    return result;
+}
+
+
+
+string solution(string new_id) {
+    string answer = "";
+    
+    new_id = step1(new_id);
+    new_id = step2(new_id);
+    new_id = step3(new_id);
+    new_id = step4(new_id);
+    new_id = step5(new_id);
+    new_id = step6(new_id);
+    new_id = step4(new_id);
+    new_id = step7(new_id);
+       
+    answer = new_id;
+    
+    return answer;
+}

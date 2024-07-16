@@ -1,0 +1,31 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+bool solution(string s) {
+    bool answer = true;
+    int str_length = s.length();
+    
+    
+    //1. 문자열 길이가 4 or 6인지 확인
+    if(str_length == 4 || str_length == 6){
+        
+    }
+    else{
+        answer = false;
+    }    
+    
+    //2. 문자열이 숫자로만 구성된지 확인
+    for(int i = 0;i<str_length;i++){//str의 문자1개씩 확인
+        if('0' <= s[i] && '9' >= s[i]){// 0 ~ 9 사이 값인 경우 -> 문제없으므로 pass
+            
+        }
+        else{// 0 ~ 9 사이 값이 아닌경우 -> answer = false
+            answer = false;
+        }
+    }
+    
+    
+    return answer;
+}

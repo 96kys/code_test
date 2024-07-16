@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+
+// friends_len은 배열 friends의 길이입니다.
+// gifts_len은 배열 gifts의 길이입니다.
+// 파라미터로 주어지는 문자열은 const로 주어집니다. 변경하려면 문자열을 복사해서 사용하세요.
+int solution(const char* friends[], size_t friends_len, const char* gifts[], size_t gifts_len) {
+    int answer = 0;
+    int friends_map[50][50] = { 0, };
+    int gifts_score[50] = { 0, };
+    int row, col;
+    int give_score[50] = { 0, };
+    int take_score[50] = { 0, };
+    int final_score[50] = { 0, };
+    char* give;
+    char* take;
+    
+    for (int k=0;k<gifts_len;k++) {
+        give = strtok(gifts[k], " "); // 선물을 주는 사람
+        take = strtok(NULL, " "); // 선물을 주는 사람   
+        
+        for(int i=0;i<friends_len;i++){
+            if(strcmp(give, friends[i]) == 0){
+                row = i;
+            }
+            if(strcmp(take, friends[i]) == 0){
+                col = i;
+            }
+        }
+        friends_map[row][col]++;        
+    }
+       
+    for(int i=0;i<friends_len;i++){
+        for(int j=0;j<friends_len;j++){
+            give_score[i] += friends_map[i][j];
+            take_score[i] += friends_map[j][i];
+        }
+        gifts_score[i] = give_score[i] - take_score[i];
+    }
+
+    for(int i=0;i<friends_len;i++){
+        for(int j=0;j<friends_len;j++){
+            if(i == j){
+                
+            }
+            else{                
+                if(friends_map[i][j] > 0 && (friends_map[i][j] > friends_map[j][i])){
+                    //선물을 내가 상대보다 더 많이준 경우                 
+                    //선물 하나 받기
+                    final_score[i] += 1;
+                }
+                if(friends_map[i][j] == friends_map[j][i]){
+                    //선물을 서로 주고 받은적이 없거나, 선물을 주고 받은 수가 같은경우
+                    if(gifts_score[i] > gifts_score[j]){
+                     //선물 하나 받기
+                     final_score[i] += 1;
+                    }
+                }                    
+            }
+        }
+    }
+    
+    for(int i =0;i<friends_len;i++){
+        if(final_score[i] > answer){
+            answer = final_score[i];
+        }
+    }
+    return answer;
+}

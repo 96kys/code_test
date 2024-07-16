@@ -1,0 +1,29 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+int solution(int n) {
+    int answer = 0;
+    int num_arr[1000]  = {0, };
+    int arr_count = 1;
+    int num_count = 1;
+    // 1. 3x마을에서 쓰는 숫자배열을 만들기
+    for(int i = 1;i<1000;i++){
+        if(i%3 == 0 || i/10 == 3 || i%10 == 3 || (i%100)/10 == 3){
+            // 3의배수, 10의 자리가 3, 1의 자리가 3 << 인 경우 스킵.
+            num_count++;
+        }
+        else{
+            num_arr[arr_count] = num_count;
+            num_count++;
+            arr_count++;                        
+        }        
+        if(i>500){//굳이 n이 100까지니깐 중간에 끊게하기위함
+            break;
+        }
+    }
+    
+    // 2. n값에 따른 3x배열순서에 맞게 대입하여 3x마을의 수의 값을 return
+    answer = num_arr[n];
+    return answer;
+}

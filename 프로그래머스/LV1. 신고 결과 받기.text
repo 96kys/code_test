@@ -1,0 +1,65 @@
+#include <string>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+vector<int> solution(vector<string> id_list, vector<string> report, int k) {
+    // 결과 기록
+    vector<int> answer(id_list.size(), 0);
+    
+    // 전제 유저들의 벤된 횟수 집계(중복처리)
+    vector<int> total_ban(id_list.size(), 0);
+    
+    // 최종적으로 벤된 유저들
+    vector<int> baned_user;
+    
+    // 2차원 백터의 벤리스트
+    // 즉 0,0은 muzi가 muzi를 신고   0,1은 muzi가 frodo를 신고로 신고 횟수를 기록
+    vector<vector<int>> banlist(id_list.size(), vector<int>(id_list.size(), 0));
+
+    //id를 숫자로 변형해서 배열 계산용 번호는 0번부터 시작
+    map<string, int>id_num;
+    
+    // string아이디를 숫자로 변형 0번 부터 부여
+    for(int i = 0;i<id_list.size();i++){
+        id_num[id_list[i]] = i;
+    }
+    
+    // 신고자와 신고 당한자를 구분하여 벤리스트에 저장    
+    for(int i = 0;i<report.size();i++){
+        // 공백을 기준으로 신고자와 신고당한자 기록
+        int pos = report[i].find(" ");
+        string kiker =  report[i].substr(0, pos);
+        string baned = report[i].substr(pos + 1);
+        // 벤리스트에 기록
+        banlist[id_num[kiker]][id_num[baned]]++;        
+    }
+        
+    // 한사람이 특정 사람에 대해서 중복 신고는 의미가 없게 처리
+    for(int i = 0;i<banlist.size();i++){
+        for(int j = 0;j<banlist[i].size();j++){
+            if(banlist[i][j] != 0){
+                total_ban[j]++;
+            }
+        }
+    }
+
+    // 최종적으로 벤되는 유저 계산
+    for(int i = 0;i<total_ban.size();i++){
+        if(total_ban[i] >= k){
+            baned_user.push_back(i);
+        }
+    }
+    
+    // 내가 신고한 유저 중 벤된 유저가 있는 경우 메일 전송
+    for(int i = 0;i<banlist.size();i++){
+        for(int j = 0;j<baned_user.size();j++){
+            if(banlist[i][baned_user[j]] != 0){
+                answer[i]++;
+            }
+        }        
+    }
+    
+    return answer;
+}

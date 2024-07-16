@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+// score_len은 배열 score의 길이입니다.
+int solution(int k, int m, int score[], size_t score_len) {
+    int answer = 0;
+    int apple_count = 0;
+    int count = 0;
+    
+    // 1. 사과들의 점수에 따른 갯수를 가진 배열 선언
+    int* apple_score = (int*)malloc((k + 1) * sizeof(int));
+    for(int i = 0;i<k+1;i++){// 배열 초기화
+        apple_score[i] = 0;
+    }
+    
+    for(int i = 0;i<score_len;i++){//점수에 따른 갯수 입력
+        apple_score[score[i]]++;
+        apple_count++;
+    }    
+    
+    // 2. 상자에 사과를 담아서 이익계산
+    char* apple_str = (char*)malloc(apple_count * sizeof(char));
+    
+    for(int i = 1;i<k+1;i++){        
+        for(int j = 0;j<apple_score[i];j++){            
+            apple_str[count] = i + '0';
+            count++;
+            }             
+    }
+    apple_str[apple_count] = NULL;//마지막 문자열 NULL
+    
+    while(apple_count >= m){
+        answer += (apple_str[apple_count - m] - '0') * m;// 문자이기 때문에  (- '0')<- 계산 시행
+        apple_count -= m;   
+    }
+    
+    
+    // 최종
+    
+    return answer;
+}

@@ -1,0 +1,21 @@
+#include <stdio.h>
+#define LEN_INPUT 11
+
+int main(void) {
+    // define되었는 11이 str의 길이 최대치이니깐 배열선언에 사용
+    char s1[LEN_INPUT];
+    
+    // n 선언 및 초기화
+    int n = 0;
+    
+    // str, n값 입력
+    scanf("%s %d", &s1, &n);
+    
+    //n값 수만큼 출력
+    for(int i=0;i<n;i++){
+    printf("%s", s1);
+    }
+    
+    
+    return 0;
+}

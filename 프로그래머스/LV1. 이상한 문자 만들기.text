@@ -1,0 +1,28 @@
+#include <string>
+#include <vector>
+using namespace std;
+
+string solution(string s) {
+    string answer = "";
+    int str_count = 0;
+        
+    for(int i =0;i<s.size();i++){
+        if(s[i] == ' '){// 공백인 경우 알파벳의 자리 수를 초기화
+            answer.push_back(s[i]);
+            str_count = 0;
+        }
+        else{// 공백이 아닌 경우
+            if(str_count%2 == 0){// 짝수인 경우 대문자
+                answer.push_back(toupper(s[i]));                
+                str_count++;
+            }
+            else{// 홀수인 경우 소문자
+                answer.push_back(tolower(s[i]));
+                str_count++;
+            }
+        }
+
+    }
+    
+    return answer;
+}

@@ -1,0 +1,30 @@
+#include <string>
+#include <vector>
+#include <map>
+
+
+using namespace std;
+
+string solution(vector<string> participant, vector<string> completion) {
+    string answer = "";
+    map<string, int> hashMap;
+    
+    // hashMap에 참가자는 ++ // 완주자는 --
+    for(int i = 0;i<participant.size();i++){
+        hashMap[participant[i]]++;
+    }        
+    for(int i = 0;i<completion.size();i++){
+        hashMap[completion[i]]--;
+    }
+    
+    
+    // hashMap에 특정 키에만 1의 값을 가짐 -> 1의 value를 가진 key가 답
+    for (auto it = hashMap.begin(); it != hashMap.end(); ++it){
+        if (it->second == 1){
+            answer = it->first;
+        }
+    }
+    
+    
+    return answer;
+}

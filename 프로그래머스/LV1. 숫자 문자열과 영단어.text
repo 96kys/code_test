@@ -1,0 +1,77 @@
+#include <string>
+#include <vector>
+using namespace std;
+
+int solution(string s) {
+    int answer = 0;
+    string temp = "";
+    
+    for(int i = 0;i<s.size();i++){
+        if(s[i] >= '0' && s[i] <= '9'){
+            temp += s[i];
+        }
+        else{
+            // zero
+            if(s[i] == 'z'){
+                i += 3;
+                temp += '0';
+            }
+            // one
+            else if(s[i] == 'o'){
+                i += 2;
+                temp += '1';      
+            }     
+            // two, three
+            else if(s[i] == 't'){
+                
+                if(s[i + 1] == 'w'){// two
+                    i += 2;
+                    temp += '2';  
+                }
+                else{// three                    
+                    i += 4;
+                    temp += '3';                      
+                }
+    
+            }        
+            // four, five
+            else if(s[i] == 'f'){
+                
+                if(s[i + 1] == 'o'){// four
+                    i += 3;
+                    temp += '4';  
+                }
+                else{// five                    
+                    i += 3;
+                    temp += '5';                      
+                }    
+            }      
+            // six, seven
+            else if(s[i] == 's'){
+                
+                if(s[i + 1] == 'i'){// six
+                    i += 2;
+                    temp += '6';  
+                }
+                else{// seven                    
+                    i += 4;
+                    temp += '7';                      
+                }       
+            }      
+            // eight
+            else if(s[i] == 'e'){
+                i += 4;
+                temp += '8';      
+            }        
+            // nine
+            else if(s[i] == 'n'){
+                i += 3;
+                temp += '9';      
+            }            
+        }        
+    }
+        
+    answer = stoi(temp);
+    
+    return answer;
+}

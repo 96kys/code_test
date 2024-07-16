@@ -1,0 +1,16 @@
+#include <iostream>
+
+using namespace std;
+int solution(int n)
+{
+    int answer = 0;
+    int MAX_N = 100000000;
+    
+    while(MAX_N >= 1){
+        answer += n/MAX_N;
+        n = n%MAX_N;
+        MAX_N = MAX_N/10;        
+    }
+
+    return answer;
+}

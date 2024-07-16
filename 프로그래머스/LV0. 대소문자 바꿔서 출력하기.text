@@ -1,0 +1,25 @@
+#include <stdio.h>
+#define LEN_INPUT 20
+
+int main(void) {
+    //str 배열선언
+    char s1[LEN_INPUT];
+    
+    
+    //str 입력
+    scanf("%s", s1);
+    
+    //문양 변경
+    for(int i=0;i<LEN_INPUT;i++){
+        if(s1[i] >= 'a' && s1[i] <= 'z'){ // 소문자인 경우
+            s1[i] = s1[i] - ('a' - 'A');
+        }
+        else if(s1[i] >= 'A' && s1[i] <= 'Z'){ // 대문자인 경우
+            s1[i] = s1[i] + ('a' - 'A');
+        }                
+    }
+    
+    printf("%s", s1);
+    
+    return 0;
+}

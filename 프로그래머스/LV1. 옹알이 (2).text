@@ -1,0 +1,45 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(vector<string> babbling) {
+    int answer = 0;    
+    int repeat_flag = 0;
+    string temp = "";
+    
+    for(int i = 0;i<babbling.size();i++){
+        while(1){            
+            if(babbling[i][0] == 'a' && babbling[i].substr(0, 3) == "aya" && repeat_flag != 1){
+                babbling[i].erase(0, 3);
+                repeat_flag = 1;
+            }
+            else if(babbling[i][0] == 'y' && babbling[i].substr(0, 2) == "ye" && repeat_flag != 2){
+                babbling[i].erase(0, 2);
+                repeat_flag = 2;
+            }
+            else if(babbling[i][0] == 'w' && babbling[i].substr(0, 3) == "woo" && repeat_flag != 3){
+                babbling[i].erase(0, 3);
+                repeat_flag = 3;
+            }
+            else if(babbling[i][0] == 'm' && babbling[i].substr(0, 2) == "ma" && repeat_flag != 4){
+                babbling[i].erase(0, 2);
+                repeat_flag = 4;
+            }
+            else{
+                break;
+            }
+            
+            if(babbling[i] == ""){
+                
+                answer++;
+                break;
+            }            
+        }
+        repeat_flag = 0;
+    }
+    
+    
+    
+    return answer;
+}

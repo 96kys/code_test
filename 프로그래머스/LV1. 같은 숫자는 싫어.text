@@ -1,0 +1,27 @@
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+vector<int> solution(vector<int> arr) 
+{
+    vector<int> answer;
+    
+    
+    // 1. 다음 숫자가 현재 숫자와 다르면 입력하는 형식
+    for(int i = 0;i<arr.size() - 1;i++){
+        if(arr[i] == arr[i + 1]){// 다음 배열 요소의 값이 같기 때문에 pass
+
+        }
+        else{// 다음 배열 요소의 값이 다르기 때문에 입력
+            answer.push_back(arr[i]);
+        }
+    }
+    
+    answer.push_back(arr[arr.size() - 1]);//마지막 요소는 무조껀 입력
+    
+
+    
+    
+    return answer;
+}

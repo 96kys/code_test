@@ -1,0 +1,35 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(int n, int m) {
+    vector<int> answer;
+    int temp = 0;
+    int temp_max;
+    int temp_min;
+    
+    // n 값이 m값 보다 적게 설정.(이후 계산을 편하게 하기 위해서)
+    if (n > m) swap(n, m);
+    
+    // 최대공약수 계산
+    for(int i = 1;i<=n;i++){
+        if(n%i == 0 && m%i == 0){
+            temp_max = i;
+        }
+    }
+    
+    // 최소공배수 계산
+    for(int i = m;i<=m*n;i++){
+        if(i%n == 0 && i%m == 0){
+            temp_min = i;
+            break;
+        }
+    }
+    
+    // answer에 입력
+    answer.push_back(temp_max);
+    answer.push_back(temp_min);
+    
+    return answer;
+}

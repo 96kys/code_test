@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+void sort(int* arr, int score, int arr_size) {//배열 요소에서 큰것이 왼쪽으로 오도록
+    for(int i = 0;i<arr_size;i++){
+        if(score > arr[i]){
+            for(int j = arr_size - 1;j>i;j--){//입력된 score값보다 작은걸 발견한 경우 밀어내기 방법
+                arr[j]  = arr[j-1];                
+            }
+            arr[i] = score;
+            break;
+        }
+    }        
+    return;
+}
+
+// score_len은 배열 score의 길이입니다.
+int* solution(int k, int score[], size_t score_len) {
+        // return 값은 malloc 등 동적 할당을 사용해주세요. 할당 길이는 상황에 맞게 변경해주세요.
+    int* answer = (int*)malloc(score_len * sizeof(int));
+    int* score_buffer = (int*)malloc(k * sizeof(int));    
+    for (int i = 0; i < k; i++) {//버퍼 초기화
+        score_buffer[i] = 0;
+    }    
+
+    for(int i = 0;i<score_len;i++){        
+        sort(score_buffer, score[i], k);//입력 받은값 sort
+        
+        if(i<k){//k이하인경우에 대해서 score_buffer끝 위치가 가장 값이 아니기 때문에 해당경우에 맞춰서
+            answer[i] = score_buffer[i];
+        }
+        else{//score_buffer끝 위치가 가장 작은값을 가짐
+            answer[i] =score_buffer[k - 1];
+        }
+    }       
+    return answer;
+}

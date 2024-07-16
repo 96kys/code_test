@@ -1,0 +1,20 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(vector<int> numbers) {
+    int answer = 0;
+    
+    // 1. 1~9까지 합을 저장
+    for(int i = 1;i<10;i++){// 1 ~ 9 까지 합을 저장
+        answer += i;
+    }
+    
+    // 2. 배열에 있는 수를 빼주면 남는 것은 없는 숫자가 남는다.
+    for(int i = 0;i<numbers.size();i++){
+        answer -= numbers[i];
+    }
+    
+    return answer;
+}

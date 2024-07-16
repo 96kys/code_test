@@ -1,0 +1,44 @@
+#include <string>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+vector<int> solution(vector<string> name, vector<int> yearning, vector<vector<string>> photo) {
+    vector<int> answer;
+    map<string, int>storage;
+    int temp = 0;
+    //////////////////////
+    for(int i = 0;i<name.size();i++){
+        storage.insert({name[i], yearning[i]});
+    }
+    
+    for(int i = 0;i<photo.size();i++){
+        for(int j = 0;j<photo[i].size();j++){
+            temp += storage[photo[i][j]];            
+        }
+        
+        // 계산한 값 입력 및 초기화
+        answer.push_back(temp);  
+        temp = 0;
+    }
+    
+    
+    
+    //////////////////////
+    /*
+    for(int i = 0;i<photo.size();i++){
+        for(int j = 0;j<photo[i].size();j++){
+            for(int k = 0;k<name.size();k++){
+                if(photo[i][j] == name[k]){
+                    temp += yearning[k];
+                    break;
+                }
+            }
+        }
+        answer.push_back(temp);
+        temp = 0;
+    }*/
+        
+    return answer;
+}

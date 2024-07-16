@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+// wallpaper_len은 배열 wallpaper의 길이입니다.
+// 파라미터로 주어지는 문자열은 const로 주어집니다. 변경하려면 문자열을 복사해서 사용하세요.
+int* solution(const char* wallpaper[], size_t wallpaper_len) {
+    // return 값은 malloc 등 동적 할당을 사용해주세요. 할당 길이는 상황에 맞게 변경해주세요.
+    int* answer = (int*)malloc(1);
+    
+    int y_range = wallpaper_len;
+    int x_range = strlen(wallpaper[0]);
+    
+    // 0. lux, luy, rdx, rdy를 각각 구하는 방법으로 계산할 것이다.
+    int lux = 100;
+    int luy = 100;
+    int rdx = -100;
+    int rdy = -100;
+            
+    
+    for(int i = 0;i<y_range;i++){
+        for(int j = 0;j<x_range;j++){
+            if(wallpaper[i][j] == '#'){
+                if(lux > i){// 1. lux는 격자 구간에서 가장 위쪽에 있는 파일의 y값을 따른다.(최소 y값)
+                    lux = i; 
+                }
+                if(luy > j){// 2. luy는 격자 구간에서 가장 왼쪽에 있는 파일의 x값을 따른다.(최소 x값)
+                    luy = j;
+                }
+                if(rdx <= i){// 3. rdx는 격자 구간에서 가장 아래쪽 있는 파일의 y + 1 값을 따른다.(최대 y값)
+                    rdx = i + 1;
+                }
+                if(rdy <= j){// 4. rdy는 격자 구간에서 가장 오른쪽 있는 파일의 x + 1 값을 따른다.(최대 x값)
+                    rdy = j + 1;
+                }
+            }
+        }
+    }
+    
+    
+    
+    answer[0] = lux;
+    answer[1] = luy;
+    answer[2] = rdx;
+    answer[3] = rdy;
+    
+    return answer;
+}

@@ -1,0 +1,29 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(vector<vector<string>> board, int h, int w) {
+    int answer = 0;
+    
+    // 상 우 하 좌 순서 배열
+    vector<int> h_axis = {1, 0, -1, 0};
+    vector<int> w_axis = {0, 1, 0, -1};
+    
+    // 선택한 칸의 색깔 기록
+    string sel_col = board[h][w];
+    
+    // 격자 크기 기록
+    int n = board.size();
+        
+    // 선택한 칸 기준으로 상 우 하 좌 순서로 범위 검색 후 이상 없는 경우 색상 확인
+    for(int i = 0;i<4;i++){
+        if(h + h_axis[i] >= 0 && h + h_axis[i] <= n-1 && w + w_axis[i] >= 0 && w + w_axis[i] <= n-1){
+            if(board[h + h_axis[i]][w + w_axis[i]] == sel_col){
+                answer++;
+            }
+        }
+    }
+    
+    return answer;
+}

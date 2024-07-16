@@ -1,0 +1,39 @@
+#include <string>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+vector<int> solution(string today, vector<string> terms, vector<string> privacies) {
+    vector<int> answer;
+    map<char, int> terms_data;
+    vector<string> terms_month = terms;
+    int today_line = 0;    
+    int temp_line = 0;
+    
+    // 오늘 날짜 년 월 일을 -> 일로 계산
+    today_line += stoi(today.substr(0,4)) * 12 * 28;
+    today_line += stoi(today.substr(5,2)) * 28;
+    today_line += stoi(today.substr(8,2));
+        
+    // 계약 종류에 따른 월수를 int형으로 저장
+    for(int i = 0;i<terms.size();i++){
+        terms_data[terms[i][0]] = stoi(terms_month[i].erase(0,2));
+    }
+    
+    // privacies의 계약과 수집일자를 일로 계산
+    for(int i = 0;i<privacies.size();i++){
+        temp_line = 0;
+        temp_line += stoi(privacies[i].substr(0,4)) * 12 * 28;
+        temp_line += stoi(privacies[i].substr(5,2)) * 28;
+        temp_line += stoi(privacies[i].substr(8,2));
+        temp_line += terms_data[privacies[i].back()] * 28;
+        
+        if(temp_line <= today_line){
+            answer.push_back(i+1);
+        }
+    }
+    
+    
+    return answer;
+}

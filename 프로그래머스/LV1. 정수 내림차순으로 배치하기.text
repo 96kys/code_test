@@ -1,0 +1,28 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+long long solution(long long n) {
+    long long answer = 0;
+    int sort_flag = 0;
+    int arr_num = 0;
+    vector<int> temp(10,0);
+    
+    // 1. n값에서 0 ~ 9 사용 수를 확인한다
+    while(n>0){
+        arr_num = n%10;
+        temp[arr_num]++;
+        n = n/10;
+    }
+    
+    // 2. 9부터 갯수만큼 반복해서 추가한다.
+    for(int i = 9;i>=0;i--){
+        for(int j = 0;j<temp[i];j++){
+            answer = answer * 10;
+            answer += i;
+        }
+    }
+    
+    return answer;
+}

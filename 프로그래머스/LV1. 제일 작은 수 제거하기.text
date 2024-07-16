@@ -1,0 +1,31 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(vector<int> arr) {
+    vector<int> answer;
+    
+    // 초기값 설정
+    int min_value = arr[0];
+    int min_index = 0;
+    
+    // 최소값 찾기
+    for (int i = 1; i < arr.size(); i++) {
+        if (min_value > arr[i]) {
+            min_value = arr[i];
+            min_index = i;
+        }
+    }
+    
+    // 최소값 지우기
+    arr.erase(arr.begin() + min_index);
+    answer = arr;
+    
+    // 배열이 비어있는경우 -1 리턴
+    if (arr.empty()) {
+        answer.push_back(-1);
+    }
+    
+    return answer;
+}

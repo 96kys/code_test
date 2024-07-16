@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define SIZE 5000
+
+struct bucket* hashtable = NULL;
+
+
+struct node{
+    
+    char* key;
+    int value;
+    struct node* next;
+};
+
+struct bucket{
+    
+    struct node* head;
+    int count;
+};
+
+
+struct node* creatnode(char* key, int value){
+    struct node* newNode;
+    newNode = (struct node*)malloc(sizeof(struct node));
+    
+    newNode->key = key;
+    newNode->value = value;    
+    newNode->next = NULL;
+    
+    return newNode;
+}
+
+int hashFunction(char* key){
+    int temp = 0;
+    for(int i = 0;i<strlen(key);i++){
+        temp += (int)key[i]*i;
+    }    
+    return temp % SIZE;
+}
+
+void insert(char* key, int value){
+    
+    int hashIndex = hashFunction(key);    
+    struct node *newNode = creatnode(key, value);
+    
+    if(hashtable[hashIndex].count == 0){
+        
+        hashtable[hashIndex].head = newNode;
+        hashtable[hashIndex].count = 1;
+    }
+    else{
+        
+        newNode->next = hashtable[hashIndex].head;
+        
+        hashtable[hashIndex].head = newNode;
+        hashtable[hashIndex].count++;
+        
+    }
+        
+    return;
+}
+
+int search(char* key){
+    int hashIndex = hashFunction(key);
+    struct node* node = hashtable[hashIndex].head;
+    
+    while(node != NULL){
+        if(strcmp(node->key, key) == 0){ // 키 비교를 위해 strcmp() 함수를 사용
+            return node->value; // 노드를 찾았을 때 해당 값을 반환
+        }
+        node = node->next;
+    }    
+    printf("No key found\n"); // 노드를 찾지 못했을 때 메시지를 출력하고 -1을 반환하거나 다른 방법으로 처리
+    return -1;
+}
+
+void Nodeupdate(char* key, int value){
+    int hashIndex = hashFunction(key);
+    struct node* node = hashtable[hashIndex].head;
+    
+    while(node != NULL){
+        if(strcmp(node->key, key) == 0){ // 키 비교를 위해 strcmp() 함수를 사용
+            node->value = value;
+        }
+        node = node->next;
+    }           
+    return;    
+}
+
+// players_len은 배열 players의 길이입니다.
+// callings_len은 배열 callings의 길이입니다.
+// 파라미터로 주어지는 문자열은 const로 주어집니다. 변경하려면 문자열을 복사해서 사용하세요.
+char** solution(const char* players[], size_t players_len, const char* callings[], size_t callings_len) {
+    // return 값은 malloc 등 동적 할당을 사용해주세요. 할당 길이는 상황에 맞게 변경해주세요.
+    char** answer = (char**)malloc(players_len * sizeof(char*)); 
+    hashtable = (struct bucket*)malloc(SIZE*sizeof(struct bucket));
+    char *buffer;      
+    int temp;
+    
+    for(size_t i = 0;i<players_len;i++){
+        answer[i] = players[i];
+        insert(answer[i], i);
+    }   
+    
+    for(size_t i = 0;i<callings_len;i++){
+        temp =  search(callings[i]);       
+        if(temp == -1){
+            printf("Error search에 문제가 있습니다.");
+        }
+        else{
+            buffer = answer[temp];
+            
+            answer[temp] = answer[temp - 1];
+            answer[temp - 1] = buffer;
+                
+            Nodeupdate(answer[temp], temp);
+            Nodeupdate(answer[temp - 1], temp - 1);
+        }
+    }
+    
+    
+    return answer;
+}

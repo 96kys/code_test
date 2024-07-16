@@ -1,0 +1,26 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(vector<int> numbers) {
+    vector<int> answer;
+    vector<int> number_count (201,0);
+    
+    // 가능한 모든 수의 합을 number_count 인덱스값으로 가지고 ++을 실행 -> 0이 아니면 만들 수 있는 수
+    for(int i = 0;i<numbers.size() - 1;i++){
+        for(int j = i + 1;j<numbers.size();j++){
+            number_count[numbers[i] + numbers[j]]++;
+        }
+    }
+    
+    
+    // 0이 아닌(만들 수 있는 수)를 찾아 answer에 입력
+    for(int i = 0;i<201;i++){
+        if(number_count[i] != 0){
+            answer.push_back(i);
+        }
+    }
+        
+    return answer;
+}

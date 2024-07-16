@@ -1,0 +1,20 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int a, int b, int n) {
+    int answer = 0;
+    int get_cola = 0;
+    int give_cola = 0;
+    
+    while(n>=a){
+        give_cola = n / a * a;
+        get_cola = n / a * b;
+        answer += get_cola;
+        n = n - give_cola + get_cola;
+    }
+    
+    
+    return answer;
+}

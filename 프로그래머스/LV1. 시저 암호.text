@@ -1,0 +1,45 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+string solution(string s, int n) {
+    string answer = "";
+    int s_size = s.size();
+    
+    
+    for(int i = 0;i<s_size;i++){
+        // 대문자에 관한 처리
+        if(s[i] >= 'A' && s[i] <= 'Z'){
+            
+            // n만큼 이동
+            if((int)s[i] + n  > 'Z'){
+                // Z를 넘는 경우
+                s[i] = s[i] + (n - ('Z' - 'A' + 1));
+            }
+            else{
+                s[i] = (char)((int)s[i] + n );
+            }
+        }
+        // 소문자에 관한 처리
+        else if(s[i] >= 'a' && s[i] <= 'z'){
+            
+            // n만큼 이동
+            if((int)s[i] + n  > 'z'){
+                // Z를 넘는 경우
+                s[i] = s[i] + (n - ('z' - 'a' + 1));
+            }
+            else{
+                s[i] = (char)((int)s[i] + n );
+            }
+        }   
+        // 공백에 관한 처리
+        else{
+            
+        }
+    }    
+    
+    answer = s;        
+    
+    return answer;
+}

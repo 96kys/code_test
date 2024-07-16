@@ -1,0 +1,45 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+string solution(string X, string Y) {
+    string answer = "";
+    vector<int> x_cnt(10, 0);
+    vector<int> y_cnt(10, 0);
+    vector<int> common_cnt(10, 0);
+    
+    // X, Y배열에서 중복되는 수를 기록
+    for(int i = 0;i<X.size();i++){
+        x_cnt[(int)(X[i] - '0')]++;
+    }        
+    for(int i = 0;i<Y.size();i++){
+        y_cnt[(int)(Y[i] - '0')]++;
+    }
+    for(int i = 0;i<common_cnt.size();i++){
+        common_cnt[i] = min(x_cnt[i], y_cnt[i]);
+    }
+    
+    // 중복된 수는 9부터 0순서 대로 입력을 하게되면 가장큰 수가 됨.
+    for(int i = 9;i>=0;i--){        
+        for(int j = 0;j<common_cnt[i];j++){
+            answer.push_back('0' + i);
+        }
+    }
+        
+    // 맨 앞 수가 0인 경우 000, 00 과 같은 것은 0 으로 표기
+    for(int i = 0;i<answer.size();i++){
+        if(answer[0] == '0'){
+            answer = "0";
+        }
+    }
+    
+    // 아무것도 중복되는 것이 없는 경우에 대한 처리
+    if(answer == ""){
+        answer = "-1";
+    }
+    
+    
+    return answer;
+}

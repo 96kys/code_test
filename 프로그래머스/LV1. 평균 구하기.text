@@ -1,0 +1,21 @@
+#include <string>
+#include <vector>
+#include <iostream>
+using namespace std;
+
+double solution(vector<int> arr) {
+    double answer = 0;
+    int arr_size = arr.size();//vector 사이즈 확인
+    int sum = 0;
+    double avg = 0;
+    
+    
+    
+    for(int i = 0;i<arr_size;i++){// vector 요소의 모든합
+        sum += arr[i];
+    }
+    
+    answer = (double)sum/arr_size;//타입 캐스팅
+    
+    return answer;
+}

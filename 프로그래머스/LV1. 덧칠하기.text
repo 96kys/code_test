@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+
+
+// section_len은 배열 section의 길이입니다.
+int solution(int n, int m, int section[], size_t section_len) {
+    int wall[100000] = {0. };
+    int answer = 0; 
+        
+    for(int i = 0;i<section_len;i++){
+        wall[section[i] - 1] = 1;// 1: 페인트 칠 해야하는 곳  0:무시
+    }
+    
+    for(int i = 0;i<n;i++){
+        if(wall[i] == 1){// 페인트 칠 해야하는 곳 일때.
+            answer++;
+            
+            for(int j = 0;j<m;j++){//룰러 크기만큼 칠해준다.
+                if(i + j < n){//벽사이즈가 안넘어가게.
+                    wall[i + j] = 0;
+                }
+                else{//벽사이즈가 넘어가는 경우.
+                    
+                }
+            }            
+        }
+    }
+    
+    
+    return answer;
+}LV1. 가장 많이 받은 선물

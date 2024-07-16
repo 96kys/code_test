@@ -1,0 +1,21 @@
+#include <string>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+string solution(string s) {
+    string answer = "";
+    int s_size = s.size();
+    
+    if(s_size%2 == 0){// 단어가 짝수인 경우
+        answer.push_back(s[s_size/2 - 1]);
+        answer.push_back(s[s_size/2]);
+    }
+    else{// 단어가 홀수인 경우
+        answer.push_back(s[s_size/2]);
+    }
+    
+    
+    return answer;
+}

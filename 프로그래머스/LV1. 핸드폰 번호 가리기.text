@@ -1,0 +1,21 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+string solution(string phone_number) {
+    string answer = "";
+    int number_length = phone_number.length();
+    
+    for(int i = 0;i<number_length-4;i++){// 마지막 자리  4개전까지는  * 을 추가
+        answer.push_back('*');
+    }
+    
+    for(int i = number_length-4;i<number_length;i++){// 마지막 4자리는 번호값을 입력
+        answer.push_back(phone_number[i]);
+    }
+    
+    
+    
+    return answer;
+}

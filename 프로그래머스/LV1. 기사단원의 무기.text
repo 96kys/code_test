@@ -1,0 +1,37 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int number, int limit, int power) {
+    int answer = 0;
+    int weapon_power = 0;
+    
+    // 순서대로 약수갯수를 구하기
+    for(int i = 1;i<=number;i++){
+        
+        // 수 i에 대해서 j*j가 i를 넘는경우에 대해서는 계산 x(효율성을 위해서)
+        for(int j = 1;j*j<=i;j++){
+            if(i%j == 0){
+                if(j*j==i){
+                    weapon_power++;
+                } 
+                else{
+                    weapon_power++;
+                    weapon_power++;
+                } 
+            } 
+        }
+        
+        if(weapon_power > limit){
+            answer += power;
+        } 
+        else{
+            answer += weapon_power;
+        }         
+        weapon_power = 0;
+    }
+    
+    
+    return answer;
+}

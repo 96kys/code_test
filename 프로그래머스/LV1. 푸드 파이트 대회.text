@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+// food_len은 배열 food의 길이입니다.
+char* solution(int food[], size_t food_len) {
+    // return 값은 malloc 등 동적 할당을 사용해주세요. 할당 길이는 상황에 맞게 변경해주세요.
+    
+    int count = 0;
+    int answer_size = 0;
+    int Buffer[food_len];
+    for(int i = 1;i<food_len;i++){
+        answer_size +=food[i]/2;
+        Buffer[i] = food[i]/2;
+    }
+    
+    char* answer = (char*)malloc(((2 * answer_size) + 1) * sizeof(char));
+    
+    for(int i = 1;i<food_len;i++){
+        for(int j = 0;j<Buffer[i];j++){
+            answer[count] = i + '0';
+            count++;
+        }
+    }
+    
+    answer[count] = '0';
+    count++;
+    
+    for(int i = answer_size-1;i>=0;i--){
+        answer[count] = answer[i];
+        count++;
+    }
+
+    answer[count] = '\0';
+    
+    return answer;
+}

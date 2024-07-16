@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+// survey_len은 배열 survey의 길이입니다.
+// choices_len은 배열 choices의 길이입니다.
+// 파라미터로 주어지는 문자열은 const로 주어집니다. 변경하려면 문자열을 복사해서 사용하세요.
+char* solution(const char* survey[], size_t survey_len, int choices[], size_t choices_len) {
+    // return 값은 malloc 등 동적 할당을 사용해주세요. 할당 길이는 상황에 맞게 변경해주세요.
+    char* answer = (char*)malloc(1);
+    
+    // 1. 8개 유형 점수를 받는 배열 선언.
+    int MBTI[8] = {0, };
+    
+    // 2. survey를 읽고 choice에 맞게 배열에 점수 입력
+    for(int i = 0;i<survey_len;i++){
+        if(choices[i] > 4){// 동의 일때  "AB" 에서 B
+            if(survey[i][1] == 'R'){
+                MBTI[0] += choices[i] % 4;
+            }
+            else if(survey[i][1] == 'T'){
+                MBTI[1] += choices[i] % 4;
+            }
+            else if(survey[i][1] == 'C'){
+                MBTI[2] += choices[i] % 4;
+            }
+            else if(survey[i][1] == 'F'){
+                MBTI[3] += choices[i] % 4;
+            }
+            else if(survey[i][1] == 'J'){
+                MBTI[4] += choices[i] % 4;
+            }
+            else if(survey[i][1] == 'M'){
+                MBTI[5] += choices[i] % 4;
+            }
+            else if(survey[i][1] == 'A'){
+                MBTI[6] += choices[i] % 4;
+            }
+            else if(survey[i][1] == 'N'){
+                MBTI[7] += choices[i] % 4;
+            }
+        }
+        else if(choices[i] < 4){// 비동의 일때 "AB" 에서 A
+            if(survey[i][0] == 'R'){
+                MBTI[0] -= choices[i] - 4;
+            }
+            else if(survey[i][0] == 'T'){
+                MBTI[1] -= choices[i] - 4;
+            }
+            else if(survey[i][0] == 'C'){
+                MBTI[2] -= choices[i] - 4;
+            }
+            else if(survey[i][0] == 'F'){
+                MBTI[3] -= choices[i] - 4;
+            }
+            else if(survey[i][0] == 'J'){
+                MBTI[4] -= choices[i] - 4;
+            }
+            else if(survey[i][0] == 'M'){
+                MBTI[5] -= choices[i] - 4;
+            }
+            else if(survey[i][0] == 'A'){
+                MBTI[6] -= choices[i] - 4;
+            }
+            else if(survey[i][0] == 'N'){
+                MBTI[7] -= choices[i] - 4;
+            }
+        }
+        else{// 모르겠음 일때 pass
+            
+        }
+    }    
+    
+    // 3. 저장된 점수를 가지고 유형 결정
+    if(MBTI[0] >= MBTI[1]){
+        answer[0] = 'R';
+    }
+    else{
+        answer[0] = 'T';
+    }
+    
+    if(MBTI[2] >= MBTI[3]){
+        answer[1] = 'C';
+    }
+    else{
+        answer[1] = 'F';
+    }
+        
+    if(MBTI[4] >= MBTI[5]){
+        answer[2] = 'J';
+    }
+    else{
+        answer[2] = 'M';
+    }
+        
+    if(MBTI[6] >= MBTI[7]){
+        answer[3] = 'A';
+    }
+    else{
+        answer[3] = 'N';
+    }
+    
+    answer[4] = NULL;
+    
+    return answer;
+}

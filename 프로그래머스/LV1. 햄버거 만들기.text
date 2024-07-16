@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+// ingredient_len은 배열 ingredient의 길이입니다.
+int solution(int ingredient[], size_t ingredient_len) {
+    int answer = 0;
+    int Buffer[1000000];
+    int count = 0;
+    int before_answer = 999;
+    int sol_falg = 0;
+       
+    for(int i = 0;i<1000000;i++){
+        Buffer[i] = 0;
+    }
+
+
+    
+
+        
+    for(int i =0;i<ingredient_len;i++){
+        Buffer[count] = ingredient[i];
+        if(Buffer[count] == 1 && count > 2){
+            if(Buffer[count - 1] == 3 && Buffer[count - 2] == 2 && Buffer[count - 3] == 1){
+                
+                answer++;
+                count = count - 4;                
+            }
+        }
+        count++;
+        
+    }       
+         
+    return answer;
+}

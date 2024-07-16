@@ -1,0 +1,54 @@
+#include <string>
+#include <vector>
+#include <map>
+
+#define  NO_KEY 9999
+
+using namespace std;
+
+vector<int> solution(vector<string> keymap, vector<string> targets) {
+    vector<int> answer;
+    map<char, int> hash_map;
+    int temp = 0;
+    
+    // 먼저 A부터 Z까지 key값에 대한 value를 초기화
+    while(1){
+        hash_map['A' + temp] = NO_KEY;
+        temp++;
+        
+        if('A' + temp > 'Z'){
+            break;
+        }        
+    }
+    
+    // key값에 대해 최소 횟수로 입력가능한 횟수를 기록
+    for(int i = 0;i<keymap.size();i++){
+        for(int j = 0;j<keymap[i].size();j++){
+            if(hash_map[keymap[i][j]] > j + 1){
+                hash_map[keymap[i][j]] = j + 1;
+            }            
+        }
+    }
+    
+    
+    // 임시 변수 초기화
+    temp = 0;
+    
+    // targets의 단어인 key값을 기준으로 value 즉 해당 단어를 입력하기위한 최소 횟수를 기록 및 출력
+    for(int i = 0;i<targets.size();i++){
+        for(int j = 0;j<targets[i].size();j++){
+            if(hash_map[targets[i][j]] == NO_KEY){
+                temp = -1;
+                break;
+            }
+            else{
+                temp += hash_map[targets[i][j]];
+            }          
+        }
+        answer.push_back(temp);
+        temp = 0;
+    }
+    
+    
+    return answer;
+}

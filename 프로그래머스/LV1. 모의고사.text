@@ -1,0 +1,51 @@
+#include <string>
+#include <vector>
+
+#define case1_size 5
+#define case2_size 8
+#define case3_size 10
+using namespace std;
+
+vector<int> solution(vector<int> answers) {
+    vector<int> answer;
+    vector<int> case1 = {1, 2, 3, 4, 5};
+    vector<int> case2 = {2, 1, 2, 3, 2, 4, 2, 5};
+    vector<int> case3 = {3, 3, 1, 1, 2, 2, 4, 4, 5, 5};
+    vector<int> score(3,0);
+    
+    int max_score = 0;
+    
+    // 답지 확인 및 점수 기록
+    for(int i = 0;i<answers.size();i++){
+        
+        if(case1[i%case1_size] == answers[i]){
+            score[0]++;
+        }
+                
+        if(case2[i%case2_size] == answers[i]){
+             score[1]++;
+        }
+                
+        if(case3[i%case3_size] == answers[i]){
+             score[2]++;
+        }               
+    }
+    
+    // 최고점수 확인
+    for(int i = 0;i<3;i++){
+        if(score[i] > max_score){
+            max_score = score[i];
+        }
+    }
+    
+    // 동일점수 확인
+    for(int i = 0;i<3;i++){
+        if(score[i] == max_score){
+            answer.push_back(i + 1);
+        }
+    }
+    
+    
+    
+    return answer;
+}

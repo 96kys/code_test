@@ -1,0 +1,77 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(vector<string> park, vector<string> routes) {
+    vector<int> answer;
+    // park 크기를 저장
+    int R = park.size();
+    int C = park[0].size();
+    
+    // 로봇 강아지 위치 이동을 위한 변수
+    int row;
+    int col;        
+    int temp_row;
+    int temp_col;    
+    int drow;
+    int dcol;
+    
+    // 현재 위치 탐색
+    for(int i = 0;i<park.size();i++){
+        for(int j = 0;j<park[i].size();j++){
+            if(park[i][j] == 'S'){
+                row = i;
+                col = j;
+                break;
+            }
+        }
+    }
+    
+    // 명령 수행
+    for(int i = 0;i<routes.size();i++){
+        // 방향과 이동길이 저장
+        char dir = routes[i][0];
+        int move = int(routes[i][2] - '0');
+        
+        // 방향에 따른 설정 저장
+        if(dir == 'N'){
+            drow = -1; dcol = 0;
+        } 
+        else if(dir == 'S'){
+            drow = 1; dcol = 0;
+        } 
+        else if(dir == 'W'){
+            drow = 0; dcol = -1;
+        } 
+        else if(dir == 'E'){
+            drow = 0; dcol = 1;
+        }
+        
+        // 해당 이동이 맵 밖으로 나가는지 확인
+        if(row+(drow*move) >= 0 && row+(drow*move) < R && col+(dcol*move) >= 0 && col+(dcol*move) < C){
+            // 처음 이동 시작하는 위치 저장
+            temp_row = row;
+            temp_col = col;
+            for(int i = 0;i<move;i++){
+                // 한칸씩 전직하며 장애물이 있는지 확인
+                if(park[row + drow][col + dcol] == 'X'){
+                    // 장애물이 있으면 처음 이동 시작하는 위치로 이동
+                    row = temp_row;
+                    col = temp_col;
+                    break;
+                }
+                else{
+                    // 장애물이 없는 경우 이동
+                    row += drow;
+                    col += dcol;
+                }
+            }
+        }          
+        
+    }
+    
+    answer.push_back(row);
+    answer.push_back(col);
+    return answer;
+}

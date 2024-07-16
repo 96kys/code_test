@@ -1,0 +1,81 @@
+#include <string>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+char cal_range(int number, int left, int right, string hand){
+    // 더 가까운 손을 반환해주는 함수       
+    // 키패드를 1 2 3 4 5 6 7 8 9 10 11 12 로 봣을 때 
+    
+    // 키패드 0번 예외처리
+    if(number == 0){
+        number = 11;
+    }
+    if(left == 0){
+        left = 11;
+    }
+    if(right == 0){
+        right = 11;
+    }
+    
+    // 3으로 나누고 나머지를 계산하기 편하게 -1씩 계산
+    number -= 1;
+    left -= 1;
+    right -= 1;
+        
+    // 왼손, 오른손기준 선택 번호까지 거리 계산    
+    int left_range_y = abs(number/3 - left/3); // 행 거리 계산
+    int right_range_y = abs(number/3 - right/3); // 행 거리 계산
+    int left_range_x = abs(number%3 - left%3); // 열 거리 계산
+    int right_range_x = abs(number%3 - right%3); // 열 거리 계산    
+    
+    if(left_range_x + left_range_y > right_range_x + right_range_y){
+        // 오른손이 더 가까운 경우
+        return 'R';
+    }
+    else if(left_range_x + left_range_y < right_range_x + right_range_y){
+        // 왼손이 더 가까운 경우
+        return 'L';
+    }
+    else{
+        // 거리가 같은 경우 hand에 따라 결정
+        if(hand == "left"){
+            return 'L';
+        }
+        else{
+            return 'R';
+        }
+    }    
+}
+
+
+
+string solution(vector<int> numbers, string hand) {
+    string answer = "";
+    int left_hand = 10;
+    int right_hand = 12;
+    
+    for(int i = 0;i<numbers.size();i++){
+        // 1,4,7 / 3,6,9 / 나머지에 대한 계산 및 기록
+        if(numbers[i] == 1 || numbers[i] == 4 || numbers[i] == 7){
+            answer.push_back('L');
+            left_hand = numbers[i];
+        }
+        else if(numbers[i] == 3 || numbers[i] == 6 || numbers[i] == 9){
+            answer.push_back('R');
+            right_hand = numbers[i];
+        }
+        else{
+            answer.push_back(cal_range(numbers[i], left_hand, right_hand, hand));
+            if(answer[answer.size() - 1] == 'R'){
+                right_hand = numbers[i];
+            }
+            else{
+                left_hand = numbers[i];
+            }
+        }
+    }
+    
+    return answer;
+}

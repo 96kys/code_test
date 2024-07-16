@@ -1,0 +1,25 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+string solution(int a, int b) {
+    string answer = "";    
+    vector<int> month = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    vector<string> day = {"FRI", "SAT","SUN","MON","TUE","WED","THU"};
+    int month_count = 1;
+    int day_count = 0;
+    
+    // '월' 맞추어 계산
+    while(a>month_count){
+        day_count += month[month_count - 1]%7;
+        month_count++;
+    }
+    
+    // '일' 맞추어 계산
+    day_count += b - 1;
+    day_count = day_count%7;
+    answer = day[day_count];
+    
+    return answer;
+}

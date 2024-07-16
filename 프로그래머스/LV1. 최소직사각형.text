@@ -1,0 +1,40 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(vector<vector<int>> sizes) {
+    int answer = 0;
+    int temp = 0;
+    int max_w = 0;
+    int max_h = 0;
+    
+    // w가 큰쪽으로 정렬 및 최대 w 찾기
+    for(int i = 0;i<sizes.size();i++){
+        
+        // w와 h중 큰수를 w로 이동
+        if(sizes[i][1] > sizes[i][0]){
+            temp = sizes[i][0];
+            sizes[i][0] = sizes[i][1];
+            sizes[i][1] = temp;
+        }
+        
+        // 최대 w 찾기
+        if(sizes[i][0] > max_w){
+            max_w = sizes[i][0];
+        }        
+    }
+    
+    // 최대 h 찾기
+    for(int i = 0;i<sizes.size();i++){
+        
+        // 최대 h 찾기
+        if(sizes[i][1] > max_h){
+            max_h = sizes[i][1];
+        }
+    }
+    
+    answer = max_w * max_h;
+    
+    return answer;
+}

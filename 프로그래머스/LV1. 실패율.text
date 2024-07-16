@@ -1,0 +1,66 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+bool cmp(pair<double, int> a, pair<double, int> b){
+    if(a.first == b.first){
+        // 실패율이 같을 경우 stage index가 작은것이 앞으로 와야한다.
+        return a.second < b.second;
+    }
+    else{
+        // 실패율이 큰것이 앞으로 와야한다.
+        return a.first > b.first;
+    }
+}  
+
+vector<int> solution(int N, vector<int> stages) {
+    vector<int> answer;
+    vector<double> fail_ratio(200000, 0);
+    vector<pair<double, int>> per_rank;
+    int stage_index = 0;
+    int cnt = stages.size();
+    double temp = 0;
+    
+    // 계산을 단순화 하기 위해서 stage를 정렬한다.
+    sort(stages.begin(), stages.end());
+    
+    // stage index의 수를 계산
+    stage_index = stages[0];    
+    for(int i = 0;i<stages.size();i++){
+        if(stages[i] == stage_index){
+            fail_ratio[stage_index]++;
+        } 
+        else{
+            stage_index = stages[i];
+            fail_ratio[stage_index]++;
+        }
+    }
+    
+    // 백분율로 계산
+    for(int i = 1;i<=N;i++){
+        temp = fail_ratio[i];
+        fail_ratio[i] = temp/cnt;
+        cnt -= temp;
+        if(cnt<= 0){
+            break;
+        }
+    }        
+    
+    // per_rank에 실패율과 index 입력
+    for(int i = 1;i<=N;i++){
+        per_rank.push_back({fail_ratio[i], i});
+        
+    }
+    
+    // 정렬
+    sort(per_rank.begin(), per_rank.end(), cmp);
+     
+    // 답 입력
+    for(int i = 0;i<per_rank.size();i++){
+        answer.push_back(per_rank[i].second);
+    }
+    
+    return answer;
+}

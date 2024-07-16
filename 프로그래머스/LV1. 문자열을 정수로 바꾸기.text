@@ -1,0 +1,25 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(string s) {
+    int answer = 0;
+    int s_length = s.length();    
+    int start_index = 0;
+    
+    if(s[0] == '-' || s[0] == '+'){
+        start_index = 1;
+    }
+
+    for(int i = start_index; i < s_length; i++) {
+        answer = answer * 10;
+        answer += (s[i] - '0');
+    }
+
+    if (s[0] == '-') {
+        answer = -answer;
+    }
+    
+    return answer;
+}

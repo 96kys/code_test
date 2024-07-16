@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define Eng_arr_len 300
+
+void arr_sort(int* Eng_arr, int skip_code){
+    for(int i = 0;i<Eng_arr_len;i++){
+        if(Eng_arr[i] == skip_code){
+            for(int j = i;j < Eng_arr_len; j++){
+                Eng_arr[j] = Eng_arr[j + 1];
+            }            
+        }
+    }
+    
+    return;
+}
+
+
+// 파라미터로 주어지는 문자열은 const로 주어집니다. 변경하려면 문자열을 복사해서 사용하세요.
+char* solution(const char* s, const char* skip, int index) {
+    // return 값은 malloc 등 동적 할당을 사용해주세요. 할당 길이는 상황에 맞게 변경해주세요.
+
+    int result_count = strlen(s);
+    char* answer = (char*)malloc(result_count + 1);
+    answer[result_count] = '\0';
+    
+    //1. 영어 배열을 가지는 배열 선언 및 초기화
+    int Eng_arr[Eng_arr_len];
+    for(int i = 0;i<Eng_arr_len;i++){
+        Eng_arr[i] = 'a' + i;
+    }    
+    
+    //2. skip값과 동일한 값을 가지는 영어배열은 배열내에 제외 및 정렬.
+    for(int i = 0;i<strlen(skip);i++){
+        arr_sort(Eng_arr, skip[i]);
+    }
+    
+    for(int i = 0;i<100;i++){
+        Eng_arr[i + ('z' - 'a' - strlen(skip) + 1)] = Eng_arr[i];
+    }
+        
+    
+    for(int i = 0;i<Eng_arr_len; i++){
+            printf("%c ", Eng_arr[i]);
+    }
+    
+    //3. s값에 따라 변경
+    for(int i = 0;i<strlen(s);i++){
+        for(int j = 0;j<Eng_arr_len;j++){
+            if((int)s[i] == Eng_arr[j]){
+                answer[i] = Eng_arr[j + index];
+                break;
+            }
+        }
+    }
+    
+    answer[result_count] = '\0';
+    return answer;
+}

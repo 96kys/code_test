@@ -1,0 +1,25 @@
+#include <string>
+#include <vector>
+using namespace std;
+
+bool solution(int x) {
+    bool answer = true;
+    int temp = 0;
+    int x_buffer = x;
+    
+    // 1.자리수를 합
+    while(x>0){
+        temp += x%10;
+        x = x/10;
+    }
+    
+    // 2. 하샤드 수 확인
+    if(x_buffer % temp == 0){
+        answer = true;
+    }
+    else{
+        answer = false;
+    }
+    
+    return answer;
+}

@@ -1,0 +1,22 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+long long solution(int a, int b) {
+    long long answer = 0;
+    
+    if(a>b){// a가 더 큰경우에 대해서는 b->a
+        for(int i = b;i<=a;i++){
+            answer += i;
+        }
+    }
+    else{// b가 더 큰경우에 대해서는 a->b
+        for(int i = a;i<=b;i++){
+            answer += i;
+        }
+    }
+
+    
+    return answer;
+}
