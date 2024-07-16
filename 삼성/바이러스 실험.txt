@@ -1,0 +1,171 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+#include <deque>
+
+using namespace std;
+
+void sim(vector<vector<int>>& matrix, vector<vector<int>>& add_matrix, vector<vector<vector<int>>>& vairous_map);
+void vairous_eat(vector<vector<int>>& matrix, vector<vector<int>>& add_matrix, vector<vector<vector<int>>>& vairous_map);
+void vairous_spread(vector<vector<int>>& matrix, vector<vector<vector<int>>>& vairous_map);
+
+
+void sim(vector<vector<int>>& matrix, vector<vector<int>>& add_matrix, vector<vector<vector<int>>>& vairous_map) {
+
+	vairous_eat(matrix, add_matrix, vairous_map);
+	vairous_spread(matrix, vairous_map);
+}
+
+
+void vairous_eat(vector<vector<int>>& matrix, vector<vector<int>>& add_matrix, vector<vector<vector<int>>>& vairous_map) {
+	int map_size = matrix.size();
+
+	vector<vector<int>> temp_matrix(map_size, vector<int>(map_size, 0));
+
+	vector<vector<vector<int>>> temp_vairous_map;
+	temp_vairous_map = vairous_map;
+	
+
+	for (int row = 1; row < map_size; row++) {
+		for (int col = 1; col < map_size; col++) {
+			vairous_map[row][col].clear();
+			for (int i = 0; i < temp_vairous_map[row][col].size(); i++) {
+
+				int age = temp_vairous_map[row][col][i];
+
+				if (matrix[row][col] >= age) {
+					matrix[row][col] -= age;
+					vairous_map[row][col].push_back(age + 1);
+				}
+				else {
+					temp_matrix[row][col] += (temp_vairous_map[row][col][i] / 2);
+				}
+			}
+		}
+	}
+	
+
+
+	for (int row = 1; row < map_size; row++) {
+		for (int col = 1; col < map_size; col++) {
+			matrix[row][col] += (temp_matrix[row][col] + add_matrix[row][col]);
+		}
+	}
+
+}
+
+
+void vairous_spread(vector<vector<int>>& matrix, vector<vector<vector<int>>>& vairous_map) {
+	int map_size = matrix.size();
+
+	// 상 하 좌 우  / 우상 우하 좌하 좌상
+	int dr[8] = { -1, 1, 0, 0, -1, 1, 1, -1 };
+	int dc[8] = { 0, 0, -1, 1, 1, 1, -1, -1 };
+
+
+	for (int row = 1; row < map_size; row++) {
+		for (int col = 1; col < map_size; col++) {
+			for (int i = 0; i < vairous_map[row][col].size(); i++) {
+
+				if (vairous_map[row][col][i] % 5 == 0) {
+
+					for (int dir = 0; dir < 8; dir++) {
+						int nr = row + dr[dir];
+						int nc = col + dc[dir];
+
+						if (nr >= 1 && nc >= 1 && nr < map_size && nc < map_size) {
+							vairous_map[nr][nc].push_back(1);
+						}
+					}
+				}
+			}	
+		}
+	}
+
+	for (int row = 1; row < map_size; row++) {
+		for (int col = 1; col < map_size; col++) {
+			sort(vairous_map[row][col].begin(), vairous_map[row][col].end());
+		}
+	}
+
+}
+
+
+int main() {
+	
+	int n, m, k;
+	cin >> n >> m >> k;
+
+	vector<vector<int>> matrix(n + 1, vector<int>(n + 1, 5));
+	vector<vector<int>> add_matrix(n + 1, vector<int>(n + 1, 0));
+
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+			cin >> add_matrix[row][col];
+		}
+	}
+
+	vector<vector<vector<int>>> vairous_map(n + 1, vector<vector<int>>(n + 1));
+	for (int i = 0; i < m; i++) {
+		int row, col ,age;
+
+		cin >> row >> col >> age;
+
+		vairous_map[row][col].push_back(age);
+	}
+
+
+	for (int i = 0; i < k; i++) {
+		sim(matrix, add_matrix, vairous_map);
+	}
+
+
+
+
+	/*
+	cout << endl;
+	for (int row = 0; row <= n; row++) {
+		for (int col = 0; col <= n; col++) {
+			cout << matrix[row][col] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+
+
+	cout << endl;
+	for (int row = 0; row <= n; row++) {
+		for (int col = 0; col <= n; col++) {
+			cout << add_matrix[row][col] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+
+
+	cout << endl;
+	for (int row = 0; row <= n; row++) {
+		for (int col = 0; col <= n; col++) {
+			cout << vairous_map[row][col].size() << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+
+	int answer = 0;
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+			answer +=  vairous_map[row][col].size();
+		}
+	}
+
+	cout << answer;
+
+	return 0;
+}

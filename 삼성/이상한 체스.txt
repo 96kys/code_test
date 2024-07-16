@@ -1,0 +1,194 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+
+void move(const vector<vector<int>>& matrix, int type, int row, int col, int turn, vector<vector<bool>>& visit);
+bool can_move(int type, int dir);
+
+void move(const vector<vector<int>>& matrix, int type, int row, int col, int turn, vector<vector<bool>>& visit) {
+	// 상 우 하 좌	
+	int dr[4] = {-1, 0, 1, 0};
+	int dc[4] = { 0, 1, 0, -1 };
+
+	visit[row][col] = true;
+	int step_size = max(matrix.size(), matrix[0].size());
+
+	for (int dir = 0; dir < 4; dir++) {
+		// 이동가능한 방향 고려
+		if (can_move(type, dir)) {
+			//유형에 맞게 해당 방향 이동가능한지?			
+			for (int step = 1; step < step_size; step++) {
+				int nr = row + ((dr[(dir + turn) % 4]) * step) ;
+				int nc = col + ((dc[(dir + turn) % 4]) * step);
+				/*
+				cout << endl;
+				cout << "nr: " << nr << "   nc: " << nc << endl;
+				*/
+				if (nr >= 0 && nc >= 0 && nr < matrix.size() && nc < matrix[0].size() && matrix[nr][nc] != 6) {
+					// step만큼 이동한 방향이 맵밖에 나가는지? 그리고 해당 방향에 상대방 말(6)이 있는지
+					visit[nr][nc] = true;
+				}
+				else if(nr >= 0 && nc >= 0 && nr < matrix.size() && nc < matrix[0].size() && matrix[nr][nc] == 6){
+					// 상대 말로 인해 못가는 경우 해당 지점 까지는 이동 가능하므로
+					visit[nr][nc] = true;
+					break;
+				}
+				else {
+					// 맵 밖에 나가는 경우
+					break;
+				}
+			}
+		}
+	}
+	
+}
+
+bool can_move(int type, int dir) {
+	bool answer;
+
+	switch (type)
+	{
+	case 1:
+	{
+		int can[4] = { 1, 0, 0, 0 };
+		answer = can[dir];
+	}
+	break;
+	case 2:
+	{
+		int can[4] = { 0, 1, 0, 1 };
+		answer = can[dir];
+	}
+	break;
+	case 3:
+	{
+		int can[4] = { 1, 1, 0, 0 };
+		answer = can[dir];
+	}
+	break;
+	case 4:
+	{
+		int can[4] = { 1, 1, 0, 1 };
+		answer = can[dir];
+	}
+	break;
+	case 5:
+	{
+		int can[4] = { 1, 1, 1, 1 };
+		answer = can[dir];
+	}
+	break;
+	}
+
+	/*
+	cout << endl;
+	cout << "dir: " << dir << "   type: " << type << "   answer: " << answer << endl;
+
+	*/
+	return answer;
+}
+
+
+
+
+
+int main() {
+
+
+	int n, m;
+	cin >> n >> m;
+
+	vector<vector<int>> matrix(n, vector<int>(m, 0));
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cin >> matrix[i][j];
+		}
+	}
+
+
+	int my_chess_cnt = 0;
+	vector<pair<int, int>> chess_info;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			if (matrix[i][j] != 6 && matrix[i][j] != 0) {
+				my_chess_cnt++;
+				chess_info.push_back({ i,j });
+			}
+		}
+	}
+
+	/*
+	cout << endl;
+	cout << endl;
+	cout << endl;
+	*/
+
+
+	int answer = n*m;
+	if (my_chess_cnt > 0) {
+
+		vector<int> turn_info(my_chess_cnt, 0);
+		while (1) {
+			int cnt = 0;
+
+
+			for (int i = 0; i < turn_info.size() - 1; i++) {
+				turn_info[i + 1] += turn_info[i] / 4;
+				turn_info[i] = turn_info[i] % 4;
+			}
+
+			if (turn_info[turn_info.size() - 1] == 4) {
+				break;
+			}
+			/*
+			for (int i = 0; i < turn_info.size(); i++) {
+				cout << turn_info[i] << " ";
+			}
+			cout << endl;
+			*/
+
+
+
+			vector<vector<bool>> visit(n, vector<bool>(m, false)); // false: 미방문		 true: 방문
+			for (int i = 0; i < my_chess_cnt; i++) {
+				move(matrix, matrix[chess_info[i].first][chess_info[i].second], chess_info[i].first, chess_info[i].second, turn_info[i], visit);
+			}
+
+			/*
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					cout << visit[i][j] << " ";
+				}
+				cout << endl;
+			}
+			cout << endl;
+			cout << endl;
+			*/
+
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < m; j++) {
+					if (visit[i][j] == false && matrix[i][j] == 0) {
+						cnt++;
+					}
+				}
+			}
+
+			if (cnt < answer) {
+				answer = cnt;
+			}
+
+			turn_info[0]++;
+		}
+	}
+
+	cout << answer;
+
+	return 0;
+}

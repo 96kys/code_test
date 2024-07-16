@@ -1,0 +1,145 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+#define offset -1
+
+void move_food(vector<pair<int, int>>& food_info, int dir, int step, int n) {
+	// 우 상우 상 좌상 좌 좌하 하 우하
+	int dr[8] = {0, -1, -1, -1, 0, 1, 1, 1};
+	int dc[8] = {1, 1, 0, -1, -1, -1, 0, 1};
+
+	for (int i = 0; i < food_info.size(); i++) {
+		int row = food_info[i].first;
+		int col = food_info[i].second;
+
+		int nr = ((row + (dr[dir] * step)) + n) % n;
+		int nc = ((col + (dc[dir] * step)) + n) % n;
+
+		food_info[i].first = nr;
+		food_info[i].second = nc;
+
+		/*
+		cout << endl;
+		cout << "row: " << food_info[i].first << "   col:  " << food_info[i].second << endl;
+		*/
+	}
+}
+
+
+void grow_up_tree(vector<pair<int, int>> food_info, vector<vector<int>>& map) {
+
+	// 상우 상좌 좌하 우하
+	int dr[4] = {-1, -1, 1, 1};
+	int dc[4] = {1, -1, -1, 1};
+
+
+	// 영양제가 있는 위치의 식물 높이 1 증가
+	for (int i = 0; i < food_info.size(); i++) {
+		int row = food_info[i].first;
+		int col = food_info[i].second;
+
+		map[row][col]++;
+	}
+
+	// 영장제가 있는 위치 식물의 대각 기준 주변 나무 확인 및 성장
+	for (int i = 0; i < food_info.size(); i++) {
+		for (int dir = 0; dir < 4; dir++) {
+			int row = food_info[i].first;
+			int col = food_info[i].second;
+
+			int nr = row + +dr[dir];
+			int nc = col + +dc[dir];
+			
+			if (nr >= 0 && nc >= 0 && nr < map.size() && nc < map.size() && map[nr][nc] >= 1) {
+				map[row][col]++;
+			}
+		}
+	}
+}
+
+void updata_food_loaction(vector<pair<int, int>>& food_info, vector<vector<int>>& map) {
+	
+	// 영양제 위치를 기록    false: 영양제가 없는 위치			true: 영양제가 있는 위치
+	vector<vector<bool>> food_map(map.size(), vector<bool>(map.size(), false));
+	for (int i = 0; i < food_info.size(); i++) {
+		food_map[food_info[i].first][food_info[i].second] = true;
+	}
+
+	// 이전 영양제 위치 제거
+	food_info.clear();
+
+	for (int i = 0; i < map.size(); i++) {
+		for (int j = 0; j < map.size(); j++) {
+			if (map[i][j] >= 2 && !food_map[i][j]) {
+				// 높이 2이상 나무인 경우 높이 2줄인 후 영양제 위치 추가
+				map[i][j] -= 2;
+				food_info.push_back({ i,j });
+
+			}
+		}
+	}
+}
+
+
+
+int main() {
+
+	int n, m;
+	cin >> n >> m;
+
+	vector<vector<int>> map(n, vector<int>(n, 0));
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			cin >> map[i][j];
+		}
+	}
+
+	vector<pair<int, int>> order;//<방향, 칸수>
+	for (int i = 0; i < m; i++) {
+		pair<int, int> temp;
+		cin >> temp.first >> temp.second;
+		order.push_back(temp);
+	}
+
+	// 영양재 위치
+	vector<pair<int, int>> food_info;
+	food_info.push_back({ n - 1,0 });
+	food_info.push_back({ n - 1,1 });
+	food_info.push_back({ n - 2,0 });
+	food_info.push_back({ n - 2,1 });
+
+	/*
+	cout << endl;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			cout << map[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+	
+	for (int i = 0; i < m; i++) {
+		move_food(food_info, order[i].first + offset, order[i].second, n);
+		grow_up_tree(food_info, map);
+		updata_food_loaction(food_info, map);
+	}
+
+	int answer = 0;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			answer += map[i][j];
+		}
+	}
+	
+
+	cout << answer;
+
+	return 0;
+}

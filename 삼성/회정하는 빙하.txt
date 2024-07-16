@@ -1,0 +1,206 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+
+void turn_ice(vector<vector<int>>& matrix, int turn_level) {
+	
+	// 우 하 좌 상 -> 시계방향
+	int dr[4] = { 0, 1, 0, -1 };
+	int dc[4] = { 1, 0, -1, 0 };
+
+	vector<pair<int, int>> start_index;
+	vector<pair<int, int>> big_matrix(4, { 0, 0 });
+
+	int big_ice = 1;
+	for (int i = 0; i < turn_level; i++) {
+		big_ice *= 2;
+	}
+	int small_ice = big_ice / 2;
+
+
+	int matrix_size = matrix.size();
+	for (int row = 0; row < matrix_size;row += big_ice) {
+		for (int col = 0; col < matrix_size; col += big_ice) {
+			start_index.push_back({ row, col });
+		}
+	}
+
+	for (int i = 0; i < start_index.size(); i++) {
+		int row = start_index[i].first;
+		int col = start_index[i].second;
+
+		big_matrix[0] = { row, col };
+		big_matrix[1] = { row , col + small_ice };
+		big_matrix[2] = { row + small_ice, col + small_ice };
+		big_matrix[3] = { row + small_ice , col };
+
+		queue<int> small_matrix;
+
+		for (int nr = big_matrix[0].first; nr < big_matrix[0].first + small_ice; nr++) {
+			for (int nc = big_matrix[0].second; nc < big_matrix[0].second + small_ice; nc++) {
+				small_matrix.push(matrix[nr][nc]);
+			}
+		}
+
+
+		for (int turn = 0; turn < 4; turn++) {
+
+			int next_turn = (turn + 1) % 4;
+			for (int nr = big_matrix[next_turn].first; nr < big_matrix[next_turn].first + small_ice; nr++) {
+				for (int nc = big_matrix[next_turn].second; nc < big_matrix[next_turn].second + small_ice; nc++) {
+					//cout << "nr: " << nr << "    nc:" << nc << endl;
+					small_matrix.push(matrix[nr][nc]);
+					//cout << "push_data: " << matrix[nr][nc] << endl;
+					matrix[nr][nc] = small_matrix.front();
+					//cout << "pop_data: " << matrix[nr][nc] << endl;
+					small_matrix.pop();
+					//cout << endl;
+				}
+			}
+		}
+	}
+}
+
+void melt_ice(vector<vector<int>>& matrix) {
+	// 상 우 하 좌
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+
+	int map_size = matrix.size();
+	vector<vector<int>> temp_matrix(map_size, vector<int>(map_size, 0));
+
+	for (int row = 0; row < map_size; row++) {
+		for (int col = 0; col < map_size; col++) {
+			// 얼음이 남아있는 경우에 대해서만 확인
+			if (matrix[row][col] > 0) {
+				// 인접한 방향에서의 얼음 갯수 확인
+				int near_ice_cnt = 0;
+				for (int dir = 0; dir < 4; dir++) {
+					int nr = row + dr[dir];
+					int nc = col + dc[dir];
+
+					if (nr >= 0 && nc >= 0 && nr < map_size && nc < map_size && matrix[nr][nc] > 0) {
+						// 인접한 방향에 얼음이 있는 경우
+						near_ice_cnt++;
+					}
+				}
+
+				// 인접한 방향에 얼음 갯수가 3개 보다 작은 경우
+				if (near_ice_cnt < 3) {
+					// 해당 위치의 얼음은 녹음
+					temp_matrix[row][col]--;
+				}
+			}
+		}
+	}
+
+	// 동시에 녹는걸 구현
+	for (int row = 0; row < map_size; row++) {
+		for (int col = 0; col < map_size; col++) {
+			matrix[row][col] += temp_matrix[row][col];
+		}
+	}
+}
+
+int find_big_ice(vector<vector<int>>& matrix) {
+	// 상 우 하 좌
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+
+	int answer = 0;
+	int map_size = matrix.size();
+
+	// false: 방문안함		true: 방문함.
+	vector<vector<bool>> visit(map_size, vector<bool>(map_size, false));
+
+	for (int row = 0; row < map_size; row++) {
+		for (int col = 0; col < map_size; col++) {
+			// 해다 위치에 얼음이 있고 방문한적이 없다면.
+			if (matrix[row][col] > 0 && !visit[row][col]) {
+				visit[row][col] = true;
+				queue<pair<int, int>> q;
+				q.push({ row, col });
+				int temp_answer = 1;
+
+				while (!q.empty()) {					
+					int row = q.front().first;
+					int col = q.front().second;
+					q.pop();
+
+					
+					for (int dir = 0; dir < 4; dir++) {
+						int nr = row + dr[dir];
+						int nc = col + dc[dir];
+
+						if (nr >= 0 && nc >= 0 && nr < map_size && nc < map_size && matrix[nr][nc] > 0 && !visit[nr][nc]) {
+							// 인접한 방향에 얼음이 있고 방문한 적이 없다면
+							visit[nr][nc] = true;
+							q.push({ nr, nc });
+							temp_answer++;		
+						}
+					}
+				}
+
+				answer = max(answer, temp_answer);
+			}
+
+		}
+	}
+
+	return answer;
+}
+
+
+
+int main() {
+	int n, q;
+	cin >> n >> q;
+
+	int map_size = 1;
+	for (int i = 0; i < n; i++) {
+		map_size *= 2;
+	}
+
+	vector<vector<int>> matrix(map_size, vector<int>(map_size, 0));
+	for (int i = 0; i < map_size; i++) {
+		for (int j = 0; j < map_size; j++) {
+			cin >> matrix[i][j];
+		}
+	}
+
+	// turn info = {turn_level}
+	vector<int> turn_info;
+	for (int i = 0; i < q; i++) {
+		int temp;
+		cin >> temp;
+		turn_info.push_back(temp);
+	}
+
+
+	int sum_answer = 0;
+	for (int i = 0; i < q; i++) {
+		// 동작
+		turn_ice(matrix, turn_info[i]);
+		melt_ice(matrix);
+	}
+
+
+	for (int row = 0; row < map_size; row++) {
+		for (int col = 0; col < map_size; col++) {
+			sum_answer += matrix[row][col];
+		}
+	}
+
+	int big_ice_answer = find_big_ice(matrix);
+
+
+	cout << sum_answer << endl;
+	cout << big_ice_answer;
+	return 0;
+}

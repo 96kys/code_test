@@ -1,0 +1,299 @@
+#include<iostream>
+#include<vector>
+#include<string>
+#include<map>
+#include<algorithm>
+#include<queue>
+
+using namespace std;
+
+int n, m, k;
+int total_user_num;
+int answer;
+
+bool move(vector<vector<pair<int, int>>>& matrix_tile, vector<vector<pair<int, int>>>& matrix_user, vector<vector<int>>& user_dir_prioriy);
+void refresh_tile(vector<vector<pair<int, int>>>& matrix_tile);
+bool can_go(int nr, int nc);
+
+
+bool sim(vector<vector<pair<int, int>>>& matrix_tile, vector<vector<pair<int, int>>>& matrix_user, vector<vector<int>>& user_dir_prioriy) {
+	
+	
+	
+	if (!move(matrix_tile, matrix_user, user_dir_prioriy)) {
+		return false;
+	}
+	refresh_tile(matrix_tile);
+
+	return true;
+}
+
+
+bool move(vector<vector<pair<int, int>>>& matrix_tile, vector<vector<pair<int, int>>>& matrix_user, vector<vector<int>>& user_dir_prioriy) {
+
+	// 한번에 이동을 위한 임시 변수
+	vector<vector<pair<int, int>>> temp_matrix_user(n + 1, vector<pair<int, int>>(n + 1, { 0, 0 }));
+	vector<vector<pair<int, int>>> temp_matrix_tile = matrix_tile;
+
+	// none 상 하 좌 우
+	int dr[5] = { 0, -1, 1, 0, 0 };
+	int dc[5] = { 0, 0, 0, -1, 1 };
+	
+	int prioriy_dir_index;
+	vector<int> prioriy_dir;
+
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+
+
+			if (matrix_user[row][col].first != 0) {
+				// 해당 인원의 방향에 따른 방향 우선순위 배열을 가져온다
+				prioriy_dir_index = ((matrix_user[row][col].first - 1) * 4) + matrix_user[row][col].second;
+				prioriy_dir = user_dir_prioriy[prioriy_dir_index];
+
+				bool move_flag = false;
+				for (int dir = 0; dir < 4; dir++) {
+					// 우선순위 방향에 따라 이동할 위치를 갱신
+					int go_dir = prioriy_dir[dir];
+					int nr = row + dr[go_dir];
+					int nc = col + dc[go_dir];
+
+					if (can_go(nr, nc)) {
+						// 격자를 벗어나느지 확인
+						if (matrix_tile[nr][nc].first == 0) {
+							// 해당 점령이 안된 칸인가?
+
+							// 점령이 안된 칸이라면 탈락을 하는 경우가 있더라도 움직인다.
+							move_flag = true;
+
+							if (temp_matrix_user[nr][nc].first == 0) {
+								// 해당 칸에 아무도 없는가? (모든 이동이 마치고 점령 하기 때문에)
+								// 아무도 없으니 이동
+								temp_matrix_user[nr][nc].first = matrix_user[row][col].first;
+								temp_matrix_tile[nr][nc].first = matrix_user[row][col].first;
+								temp_matrix_tile[nr][nc].second = k + 1;
+
+								// 이동한 방향으로 방향 전환
+								temp_matrix_user[nr][nc].second = go_dir;
+
+								// 이동 하였으니 원래 있던 위치를 비워준다
+								matrix_user[row][col].first = 0;
+								break;
+							}
+							else {
+								// 누군가 있다
+								if (temp_matrix_user[nr][nc].first > matrix_user[row][col].first) {
+									// 거기에 있는 사람이 나보다 숫자가 큰가?
+									// 나보다 큰경우 내가 그자리를 차지
+									temp_matrix_user[nr][nc].first = matrix_user[row][col].first;
+									temp_matrix_tile[nr][nc].first = matrix_user[row][col].first;
+									temp_matrix_tile[nr][nc].second = k + 1;
+
+									// 이동한 방향으로 방향 전환
+									temp_matrix_user[nr][nc].second = go_dir;
+
+									// 이동 하였으니 원래 있던 위치를 비워준다
+									matrix_user[row][col].first = 0;
+
+									total_user_num--;
+
+									break;
+								}
+								else {
+									// 내가 그 사람 보다 작다.
+
+									// 탈락 기존 위치 제거
+									matrix_user[row][col].first = 0;
+									total_user_num--;
+
+									break;
+								}
+							}
+						}
+					}
+				}
+				
+				if (!move_flag) {
+					// 빈칸이 없어서 못움직인 경우
+					for (int dir = 0; dir < 4; dir++) {
+						// 우선순위 방향에 따라 이동할 위치를 갱신
+						int go_dir = prioriy_dir[dir];
+						int nr = row + dr[go_dir];
+						int nc = col + dc[go_dir];
+
+						if (can_go(nr, nc)) {
+							// 격자를 벗어 나는지
+							if (matrix_tile[nr][nc].first == matrix_user[row][col].first) {
+								// 해당칸이 내가 점령 하였던 위치라면 이동
+								temp_matrix_user[nr][nc].first = matrix_user[row][col].first;
+								temp_matrix_tile[nr][nc].first = matrix_user[row][col].first;
+								temp_matrix_tile[nr][nc].second = k + 1;
+
+								// 이동한 방향으로 방향 전환
+								temp_matrix_user[nr][nc].second = go_dir;
+
+								// 이동 전 위치 제거
+								matrix_user[row][col].first = 0;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+
+		}
+	}
+
+	matrix_tile = temp_matrix_tile;
+	matrix_user = temp_matrix_user;
+	if (total_user_num <= 1) {
+		return false;
+	}
+
+
+	return true;
+}
+
+
+
+
+
+
+
+
+
+void refresh_tile(vector<vector<pair<int, int>>>& matrix_tile) {	
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+			if (matrix_tile[row][col].second > 0) {
+				matrix_tile[row][col].second--;
+			}
+			if (matrix_tile[row][col].second == 0) {
+				matrix_tile[row][col].first = 0;
+			}
+		}
+	}
+}
+
+
+
+bool can_go(int nr, int nc) {
+	if (nr >= 1 && nc >= 1 && nr <= n && nc <= n) {
+		return true;
+	}
+	return false;
+}
+
+
+
+
+
+int main() {
+
+	cin >> n >> m >> k;
+	total_user_num = m;
+
+	vector<vector<pair<int, int>>> matrix_tile(n + 1, vector<pair<int, int>>(n + 1, { 0, 0 }));
+	vector<vector<pair<int, int>>> matrix_user(n + 1, vector<pair<int, int>>(n + 1, { 0, 0 }));
+
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+			cin >> matrix_user[row][col].first;
+			if (matrix_user[row][col].first != 0) {
+				matrix_tile[row][col].first = matrix_user[row][col].first;
+				matrix_tile[row][col].second = k;
+			}
+		}
+	}
+
+	vector<int >intput_dir(m, 0);
+	for (int i = 0; i < m; i++) {
+		cin >> intput_dir[i];
+	}
+
+
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+			if (matrix_user[row][col].first != 0) {
+				matrix_user[row][col].second = intput_dir[matrix_user[row][col].first - 1];
+			}
+		}
+	}
+
+	vector<vector<int>> user_dir_prioriy((m * 4) + 1, vector<int>(4, 0));	
+
+	for (int i = 1; i <= (m * 4); i++) {
+		cin >> user_dir_prioriy[i][0] >> user_dir_prioriy[i][1] >> user_dir_prioriy[i][2] >> user_dir_prioriy[i][3];
+	}
+
+	int cnt = 0;
+	while (sim(matrix_tile, matrix_user, user_dir_prioriy)) {
+		cnt++;
+		if (cnt >= 1000) {
+			answer = -1;
+			break;
+		}
+
+
+		///////////////
+		/*
+		for (int i = 1; i <= (m * 4); i++) {
+			cout << user_dir_prioriy[i][0] << user_dir_prioriy[i][1] << user_dir_prioriy[i][2] << user_dir_prioriy[i][3] << endl;
+		}
+
+
+
+
+		cout << "사람 위치 정보" << endl;
+		for (int row = 1; row <= n; row++) {
+			for (int col = 1; col <= n; col++) {
+				cout << matrix_user[row][col].first << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+
+		cout << "사람 방향 정보" << endl;
+		for (int row = 1; row <= n; row++) {
+			for (int col = 1; col <= n; col++) {
+				cout << matrix_user[row][col].second << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+
+		cout << "타일 점령 정보" << endl;
+		for (int row = 1; row <= n; row++) {
+			for (int col = 1; col <= n; col++) {
+				cout << matrix_tile[row][col].first << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+
+		cout << "타일 점령 기간 정보" << endl;
+		for (int row = 1; row <= n; row++) {
+			for (int col = 1; col <= n; col++) {
+				cout << matrix_tile[row][col].second << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+		*/
+		////////////
+
+
+	}
+	
+	if (answer != -1) {
+		answer = cnt + 1;
+	}
+
+
+
+
+	cout << answer;
+
+	return 0;
+}

@@ -1,0 +1,318 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+bool move_check_and_move(vector<vector<int>> map, vector<vector<int>> map_night, vector<vector<int>>& knight_info, int knight_num, int dir);
+void update_map(vector<vector<int>> map, vector<vector<int>>& map_night, vector<vector<int>> knight_info);
+void damage_cal(vector<vector<int>> map, vector<vector<int>> map_night, vector<vector<int>>& knight_info, int push_knight);
+
+// 해당 명령 턴에서 움직였는지 안움직였는지 기록하는 변수
+vector<int> move_flag;
+
+bool move_check_and_move(vector<vector<int>> map, vector<vector<int>> map_night, vector<vector<int>> &knight_info, int knight_num, int dir) {
+
+	// 위쪽, 오른쪽, 아래쪽, 왼쪽 
+	int temp_r[4] = { -1, 0, 1, 0 };
+	int temp_c[4] = { 0, 1, 0, -1 };
+
+	int dr = temp_r[dir];
+	int dc = temp_c[dir];
+
+	// 이번 행동에서 움직인 적이 있는지에 대한것(두번 움직이면 안되기 때문에) // 0: 안움직임  1: 움직임
+	for (int i = 0; i < knight_info.size(); i++){
+		// 새로운 턴이 왔으므로 초기화
+		move_flag[i] = 0;
+	}
+	
+	queue<int> q;
+
+	q.push(knight_num);
+	move_flag[knight_num] = 1;// 해당 이 움직임
+
+
+	while (!q.empty()) {
+
+		int move_knight = q.front();
+		q.pop();
+
+		vector<int> knight_row;
+		vector<int> knight_col;
+
+		int row_start = knight_info[move_knight][0];
+		int row_end = knight_info[move_knight][0] + knight_info[move_knight][2];
+
+		int col_start = knight_info[move_knight][1];
+		int col_end = knight_info[move_knight][1] + knight_info[move_knight][3];
+
+
+		for (int i = row_start; i < row_end; i++) {
+			for (int j = col_start; j < col_end; j++) {
+				knight_row.push_back(i);
+				knight_col.push_back(j);
+			}
+		}
+
+
+		for (int i = 0; i < knight_row.size(); i++) {
+
+			if (map[knight_row[i] + dr][knight_col[i] + dc] == 2){
+				// 이동하였을 때 벽이 있는 경우에 대해서.
+				return false;
+			}
+
+			if (map_night[knight_row[i] + dr][knight_col[i] + dc] != 0) {
+				// 해당 칸에 다른 기사가 있는 경우
+				if (move_flag[map_night[knight_row[i] + dr][knight_col[i] + dc] - 1] == 0) {
+					// 해당 기사가 움직였는지 확인 -> 안움직인 경우: q에 push.
+					q.push(map_night[knight_row[i] + dr][knight_col[i] + dc] - 1);
+					move_flag[map_night[knight_row[i] + dr][knight_col[i] + dc] - 1] = 1;
+				}
+			}
+		}
+	}
+
+
+	// 여기 까지 진행을 했다면 이동이 가능한 경우이다.
+	// 이동을 한 기사들 유무 정보는 move_flag에 1로 저장되어있다.
+	// 즉 move_flag != 0 인 경우에 대해서 
+	// 기존위치에서 dr dc 만큼 더한다.
+	for (int i = 0; i < move_flag.size(); i++) {
+		if (move_flag[i] != 0) {
+			knight_info[i][0] += dr;
+			knight_info[i][1] += dc;
+		}
+	}
+
+	return true;
+}
+
+void update_map(vector<vector<int>> map, vector<vector<int>> &map_night, vector<vector<int>> knight_info) {
+
+	// 원래 맵 0으로 초기화
+	for (int i = 0; i < map_night.size(); i++) {
+		for (int j = 0; j < map_night.size(); j++) {
+			map_night[i][j] = 0;
+		}
+	}
+
+	// 이동이 갱신된 knight_info를 기반으로 맵 초기화
+	for (int num = 0; num < knight_info.size(); num++) {
+
+		int row_start = knight_info[num][0];
+		int row_end = knight_info[num][0] + knight_info[num][2];
+
+		int col_start = knight_info[num][1];
+		int col_end = knight_info[num][1] + knight_info[num][3];
+
+		for (int i = row_start; i < row_end; i++) {
+			for (int j = col_start; j < col_end; j++) {
+				map_night[i][j] = num + 1;
+			}
+		}
+	}
+}
+
+
+void damage_cal(vector<vector<int>> map, vector<vector<int>> map_night, vector<vector<int>>& knight_info, int push_knight) {
+
+	// push_knight는 왕의 명령을 받고 움직인 기사이므로 해당 기사는 데미지를 받으면 안된다.
+
+
+	for (int i = 0; i < map.size(); i++) {
+		for (int j = 0; j < map.size(); j++) {
+			if (map[i][j] == 1 && map_night[i][j] != 0) {
+				// map을 확인하였을 때 함정이고 해당 지점에 기사가 있는 경우
+				if (map_night[i][j] - 1 != push_knight && move_flag[map_night[i][j] - 1] != 0) {
+					// 해당 위치의 기사가 왕의 명령을 받은 기사가 아닌 경우 
+					// 그리고 move_flag를 통해서 이번 턴에서 움직인 경우
+					/*
+					cout << endl;
+					cout << endl;
+					cout << endl;
+					cout << endl;
+					cout << endl;
+					cout << endl;
+					cout << "왕의 명령을 수행하는 기사 정보:  " << push_knight + 1<< endl;
+					cout << "함정 위치:  " << i << " " << j << endl;
+					cout << "함정위에 있는 기사 정보:  " << map_night[i][j];
+					cout << endl;
+					*/
+					knight_info[map_night[i][j] - 1][4]--;
+				}				
+			}
+		}
+	}
+
+}
+
+
+int main() {
+
+	int L, N, Q;
+	cin >> L >> N >> Q;
+
+
+	for (int i = 0; i < N; i++) {
+		// 기사들이 움직였는지 안움직였는지에 대한 변수 초기화	0: 안움직임		1: 움직임
+		move_flag.push_back(0);
+	}
+
+	vector<vector<int>> map(L + 2, vector<int>(L + 2, 2));
+
+	for (int i = 1; i <= L; i++) {
+		for (int j = 1; j <= L; j++) {
+			cin >> map[i][j];			
+		}
+	}
+
+	vector<vector<int>> knight_info;
+	for (int i = 0; i < N; i++) {
+		int r, c, h, w, k;
+		cin >> r >> c >> h >> w >> k;
+		vector<int>temp = { r, c, h, w, k };
+		knight_info.push_back(temp);
+	}
+
+	vector<vector<int>> king_order;
+	for (int i = 0; i < Q; i++) {
+		int knight_num, dir;
+		cin >> knight_num >> dir;
+		vector<int> temp = { knight_num - 1, dir };
+		king_order.push_back(temp);
+	}
+
+	/*
+	cout << endl;
+	cout << endl;
+	*/
+
+	vector<vector<int>> map_night(L + 2, vector<int>(L + 2, 0));
+
+	for (int num = 0; num < N; num++) {
+		int row = knight_info[num][0];
+		int col = knight_info[num][1];
+		int dr = knight_info[num][2];
+		int dc = knight_info[num][3];
+
+		for (int i = row; i < row + dr; i++) {
+			for (int j = col; j < col + dc; j++) {
+				map_night[i][j] = num + 1;
+			}
+		}
+	}
+
+
+	/*
+	for (int i = 0; i < map_night.size(); i++) {
+		for (int j = 0; j < map_night.size(); j++) {
+			cout << map_night[i][j] << " ";
+		}
+		cout << endl;
+	}
+
+	cout << endl;
+	cout << endl;
+	
+
+	for (int i = 0; i < map.size(); i++) {
+		for (int j = 0; j < map.size(); j++) {
+			cout << map[i][j] << " ";
+		}
+		cout << endl;
+	}
+	*/
+
+	// 왕의 명령 수행 전 초기 체력 저장
+	vector<int> init_HP;
+	for (int i = 0; i < knight_info.size(); i++) {
+		init_HP.push_back(knight_info[i][4]);
+	}
+
+	// 왕의 명령 수행
+	for (int i = 0; i < Q; i++) {
+		
+		if (knight_info[king_order[i][0]][4] == 9999) {
+			// 명령을 받은 기사가 사라진 기사인 경우 명령 수행X
+		}
+		else {
+			// 왕의 명령 수행 시작.
+			
+			// 이동이 가능한지 확인 하고 가능하면 이동된 기사들의 위치정보 갱신
+			bool check_result = move_check_and_move(map, map_night, knight_info, king_order[i][0], king_order[i][1]);
+
+			if (check_result) {
+				// 움직임이 가능한 경우
+				update_map(map, map_night, knight_info);
+				damage_cal(map, map_night, knight_info, king_order[i][0]);
+
+				// 해당 이동으로 죽은 사람이 있는지 없는지 확인 하는 변수	0: 안죽음  1: 죽음
+				int dead_flag = 0;
+				for (int i = 0; i < knight_info.size(); i++) {
+					if (knight_info[i][4] <= 0) {
+						// 해당 기사의 체력이 0 이하 즉 죽은 경우에 대해서
+						// 벽(0, 0)으로 이동시켜서 없애 버림.
+						knight_info[i][0] = 0;
+						knight_info[i][1] = 0;
+						knight_info[i][2] = 0;
+						knight_info[i][3] = 0;
+						knight_info[i][4] = 9999; // 체력 9999인 것은 죽은 것으로 판단.
+
+						// 움직임으로 기사가 죽었으므로 죽음 변수 초기화
+						dead_flag = 1;
+					}
+				}
+
+				// 해당 움직임으로 기사가 죽은 경우 맵 갱신
+				if (dead_flag == 1) {
+					update_map(map, map_night, knight_info);
+				}
+			}
+
+			/*
+			cout << endl; cout << endl;
+
+
+			for (int i = 0; i < map_night.size(); i++) {
+				for (int j = 0; j < map_night.size(); j++) {
+					cout << map_night[i][j] << " ";
+				}
+				cout << endl;
+			}
+
+			cout << endl;
+			cout << endl;
+			*/
+		}
+
+		/*
+		cout << endl;
+		cout << endl;
+		cout << endl;
+		for (int i = 0; i < knight_info.size(); i++) {
+			cout << "체력: " << knight_info[i][4] << "  ";
+		}
+		*/
+	}
+
+
+	// 초기 체력과 현재 체력을 비교하여 결과 출력
+	int answer = 0;
+
+	for (int i = 0; i < knight_info.size(); i++) {
+		if (knight_info[i][4] != 9999) {
+			// 해당 가시가 죽은 기사가 아니라면
+			answer += (init_HP[i] - knight_info[i][4]);
+		}
+	}
+
+	//cout << "종료 결과는 : " << answer << " 입니다.";
+
+	cout << answer;
+
+	return 0;
+}

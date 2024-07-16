@@ -1,0 +1,226 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+int n;
+int total_score = 0;
+
+void sim(vector<vector<int>>& matrix);
+void cal_score(vector<vector<int>>& matrix);
+void turn(vector<vector<int>>& matrix);
+
+
+void sim(vector<vector<int>>& matrix) {
+	cal_score(matrix);
+	turn(matrix);
+}
+
+void cal_score(vector<vector<int>>& matrix) {
+
+	// 상 하 좌 우
+	int dr[4] = { -1, 1, 0, 0 };
+	int dc[4] = { 0, 0, -1, 1 };
+
+
+	vector<vector<int>> visit(matrix.size(), vector<int>(matrix.size(), -1));
+	int visit_index = 0;
+	queue<pair<int, int>> q;
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+
+			if (visit[i][j] == -1) {				
+				q.push({ i, j });
+				visit[i][j] = visit_index;
+
+
+				while (!q.empty()) {
+					int row = q.front().first;
+					int col = q.front().second;
+
+					q.pop();
+
+					for (int dir = 0; dir < 4; dir++) {
+
+
+						int nr = row + dr[dir];
+						int nc = col + dc[dir];
+
+						if (nr >= 0 && nc >= 0 && nr < n && nc < n && matrix[nr][nc] == matrix[i][j] && visit[nr][nc] == -1) {
+							visit[nr][nc] = visit_index;
+							q.push({ nr, nc });
+						}
+					}
+				}
+				visit_index++;
+			}
+		}
+	}
+
+
+	vector<vector<int>> near_info(visit_index, vector<int>(visit_index, 0));
+	vector<pair<int, int>> group_size(visit_index, {0, 0});
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			group_size[visit[i][j]].first++;
+			group_size[visit[i][j]].second = matrix[i][j];
+
+			for (int dir = 0; dir < 4; dir++) {
+				int nr = i + dr[dir];
+				int nc = j + dc[dir];
+
+				if (nr >= 0 && nc >= 0 && nr < n && nc < n) {
+					near_info[visit[i][j]][visit[nr][nc]]++;
+				}
+			}
+
+		}		
+	}
+
+	int score = 0;
+	for (int i = 0; i < group_size.size() - 1; i++) {
+		for (int j = i + 1; j < group_size.size(); j++) {
+			int group_size_a = group_size[i].first;
+			int group_size_b = group_size[j].first;
+			int group_a_number = group_size[i].second;
+			int group_b_number = group_size[j].second;
+			int meet_side = near_info[i][j];
+
+			score += (group_size_a + group_size_b) * group_a_number * group_b_number * meet_side;
+			//cout << "i: " << i << "  j: " << j << endl;
+		}
+	}
+	total_score += score;
+
+	/*
+	for (int i = 0; i < group_size.size(); i++) {
+		cout << "해당 그룹 갯수:  " << group_size[i].first << "    해당 그룹 숫자: " << group_size[i].second << endl;
+	}
+
+	cout << "near_info " << endl;
+	for (int i = 0; i < visit_index; i++) {
+		for (int j = 0; j < visit_index; j++) {
+			cout << near_info[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+
+
+	cout << endl;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			cout << visit[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+
+}
+
+
+
+void turn(vector<vector<int>>& matrix) {
+
+	vector<vector<int>> temp_matrix(n, vector<int>(n, 0));
+	
+	queue<int> row_data;
+	queue<int> col_data;
+	
+	for (int row = 0; row < n; row++) {
+		row_data.push(matrix[row][(int)(n / 2)]);
+	}
+	for (int col = 0; col < n; col++) {
+		col_data.push(matrix[(int)(n / 2)][col]);
+	}
+	for (int col = 0; col < n; col++) {
+		temp_matrix[(int)(n / 2)][col] = row_data.front();
+		row_data.pop();
+	}
+	for (int row = n-1; row >= 0; row--) {
+		temp_matrix[row][(int)(n / 2)] = col_data.front();
+		col_data.pop();
+	}
+	
+
+	
+	
+	for (int row = 0; row < (int)(n / 2); row++) {
+		for (int col = 0; col < (int)(n / 2); col++) {
+			temp_matrix[col][(int)(n / 2) - 1 - row] = matrix[row][col];
+		}
+	}
+	
+	
+	for (int row = (int)(n / 2) + 1; row < n; row++) {
+		for (int col = 0; col < (int)(n / 2); col++) {
+			temp_matrix[col + n / 2 + 1][n - 1 - row] = matrix[row][col];
+		}
+	}	
+	
+	
+	for (int row = 0; row < (int)(n / 2); row++) {
+		for (int col = (int)(n / 2) +1; col < n; col++) {
+			temp_matrix[col - (int)(n / 2) - 1][n - 1 - row] = matrix[row][col];
+		}
+	}
+	
+	
+	for (int row = (int)(n / 2) + 1; row < n; row++) {
+		for (int col = (int)(n / 2) + 1; col < n; col++) {
+			temp_matrix[col][n - 1 - (row - ((int)(n / 2) + 1))] = matrix[row][col];
+		}
+	}
+	
+	matrix = temp_matrix;
+	/*
+	cout << " 화전 결과";
+	cout << endl;
+	for (int row = 0; row < n; row++) {
+		for (int col = 0; col < n; col++) {
+			cout << temp_matrix[row][col] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+
+}
+
+
+
+int main() {
+	cin >> n;
+	
+	vector<vector<int>> matrix(n, vector<int>(n, 0));
+
+	for (int row = 0; row < n; row++) {
+		for (int col = 0; col < n; col++) {
+			cin >> matrix[row][col];
+		}
+	}
+
+	sim(matrix);
+	sim(matrix);
+	sim(matrix);
+	sim(matrix);
+	/*
+	cout << endl;
+	for (int row = 0; row < n; row++) {
+		for (int col = 0; col < n; col++) {
+			cout <<  matrix[row][col] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+	
+
+	cout << total_score;
+
+	return 0;
+}

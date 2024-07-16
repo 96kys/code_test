@@ -1,0 +1,226 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int total_score = 0;
+int R, C, K;
+pair<int, int> rock_location;
+
+void sim(vector<pair<int, int>>& rock_info, vector<vector<pair<int, bool>>>& matrix);
+void put_rock(vector<pair<int, int>>& rock_info, vector<vector<pair<int, bool>>>& matrix, int rock_index);
+bool check_down(vector<vector<pair<int, bool>>>& matrix, int row, int col);
+bool check_overflow(vector<vector<pair<int, bool>>>& matrix);
+int cal_score(vector<vector<pair<int, bool>>>& matrix, int rock_index);
+
+
+void sim(vector<pair<int, int>>& rock_info, vector<vector<pair<int, bool>>>& matrix) {
+
+	for (int i = 0; i < K; i++) {
+		put_rock(rock_info, matrix, i);
+		if (check_overflow(matrix)) {
+			// true -> 넘치치 않음
+			// 총합에 점수 추가
+			int score = cal_score(matrix, i);
+			total_score += score;
+		}
+		else {
+			// 넘침 점수 추가 x
+		}
+
+		/*
+		cout << endl;
+		cout << "total_score: " << total_score << endl;
+		cout << endl;
+		for (int row = 0; row < matrix.size(); row++) {
+			for (int col = 0; col < matrix[0].size(); col++) {
+				cout << matrix[row][col].first << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+
+
+
+		cout << endl;
+		for (int row = 0; row < matrix.size(); row++) {
+			for (int col = 0; col < matrix[0].size(); col++) {
+				cout << matrix[row][col].second << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+		*/
+	}
+}
+
+void put_rock(vector<pair<int, int>>& rock_info, vector<vector<pair<int, bool>>>& matrix, int rock_index) {
+
+	int out_door_dir = rock_info[rock_index].second;
+
+	// 북 동 남 서
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+
+	pair<int, int> mid = { 1, rock_info[rock_index].first };
+
+	while (1){
+		if (check_down(matrix, mid.first, mid.second)) {
+			// 아래로 이동
+			mid.first++;
+		}
+		else if (check_down(matrix, mid.first, mid.second - 1)) {
+			// 서쪽으로 이동 후 아래로 이동			
+			mid.first++;
+			mid.second--;
+			out_door_dir = (out_door_dir - 1 + 4) % 4;
+		}
+		else if (check_down(matrix, mid.first, mid.second + 1)) {
+			// 동쪽으로 이동 후 아래로 이동
+			mid.first++;
+			mid.second++;
+			out_door_dir = (out_door_dir + 1 + 4) % 4;
+		}
+		else {
+			// 더 이상 이동이 안되는 경우 즉 갈 수 있는데 까지 간경우
+			break;
+		}
+		
+	}
+	
+	matrix[mid.first][mid.second].first = rock_index + 1;
+	for (int dir = 0; dir < 4; dir++) {
+		int nr = mid.first + dr[dir];
+		int nc = mid.second + dc[dir];
+
+		matrix[nr][nc].first = rock_index + 1;
+		if (out_door_dir == dir) {
+			matrix[nr][nc].second = true;
+		}
+	}
+
+	rock_location = { mid.first , mid.second };
+
+}
+
+bool check_down(vector<vector<pair<int, bool>>>& matrix, int row, int col) {
+
+	// 좌 하 우 상
+	int dr[4] = { 0, 1, 0, -1 };
+	int dc[4] = { -1, 0, 1, 0 };
+
+	if (row >= matrix.size() || col >= matrix[0].size() || matrix[row][col].first != 0) {
+		return false;
+	}
+
+	for (int dir = 0; dir < 4; dir++) {
+		int nr = row + dr[dir];
+		int nc = col + dc[dir];
+		if (nr >= matrix.size() || nc >= matrix[0].size() || matrix[nr][nc].first != 0) {
+			return false;
+		}
+
+	}
+
+
+
+	for (int dir = 0; dir < 3; dir++) {
+		// 아래 한칸 확인
+		int nr = row + dr[dir] + 1;
+		int nc = col + dc[dir];
+
+		if (nr >= matrix.size() || nc >= matrix[0].size() || matrix[nr][nc].first != 0) {
+			// 맵 밖으로 나가거나. 아래에 이미 골램이 있는 경우 false
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool check_overflow(vector<vector<pair<int, bool>>>& matrix) {
+
+	int dead_line = 2;
+
+	for (int col = 0; col < matrix[0].size(); col++) {
+		if (matrix[dead_line][col].first != 0) {
+			matrix = vector<vector<pair<int, bool>>>(R + 3, vector<pair<int, bool>>(C, { 0, false }));
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+int cal_score(vector<vector<pair<int, bool>>>& matrix, int rock_index) {
+	int score = 0;
+	// 해당 타일에 방문 가능한가? true -> 가능		false -> 불가능(이전에 이미 방문함)
+	vector<vector<bool>> visit(R + 3, vector<bool>(C, true));
+	int rock_number = rock_index + 1;
+	// 북 동 남 서
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+
+	// rock_location 전역변수로 가장 최근에 넣은 골렘(rock_index에 해당하는)의 중앙 위치 정보를 가지고 있다.
+
+	queue<vector<int>> q;
+	q.push({ rock_location.first, rock_location.second, rock_number });
+	visit[rock_location.first][rock_location.second] = false;
+
+	while (!q.empty()) {
+		int row = q.front()[0];
+		int col = q.front()[1];
+		rock_number = q.front()[2];
+		
+		score = max(score, row);
+
+		q.pop();
+
+		for (int dir = 0; dir < 4; dir++) {
+			int nr = row + dr[dir];
+			int nc = col + dc[dir];
+
+			if (nr >= 0 && nc >= 0 && nr < matrix.size() && nc < matrix[0].size() && matrix[nr][nc].first != 0 && visit[nr][nc]) {
+				if ((matrix[row][col].first == matrix[nr][nc].first) || matrix[row][col].second == true) {
+					// 해당 이동 한 방향에 타일이 기존 골렘인 경우 (즉 한개의 골렘 내에서 이동하는 경우)
+					// 또는 현재 위치가 출구인 경우 -> 이동
+					q.push({ nr, nc, matrix[nr][nc].first });
+					visit[nr][nc] = false;
+				}
+			}
+		}
+
+	}
+
+	score -= 2;
+
+	return score;
+}
+
+
+int main() {
+
+	cin >> R >> C >> K;
+	// matrix.first 는 해당 칸의 빈칸인지 골렘이 있는지  해당 골렘 번호에 맞게 저장  
+	// matrix.second 는 입구 유무를 뜻함
+	vector<vector<pair<int, bool>>> matrix(R + 3, vector<pair<int, bool>>(C, {0, false}));
+	vector<pair<int, int>> rock_info;
+
+	for (int i = 0; i < K; i++) {
+		pair<int, int> temp;
+		cin >> temp.first >> temp.second;
+		temp.first--;
+		rock_info.push_back(temp);
+	}
+
+	sim(rock_info, matrix);
+
+	cout << total_score;
+
+	return 0;
+}

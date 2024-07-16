@@ -1,0 +1,235 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+
+void sand_spread(vector<vector<int>>& matrix) {
+	
+	// 상 우 하 좌
+	int dr[4] = {-1, 0, 1, 0};
+	int dc[4] = {0, 1, 0, -1};
+
+	int n = matrix.size();
+	int m = matrix[0].size();
+	vector<vector<int>> add_sand(n, vector<int>(m, 0));
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			if (matrix[i][j] > 0) {
+				// 확산할 때 확산되는 모래양
+				int sand_value = matrix[i][j] / 5;
+				for (int dir = 0; dir < 4; dir++) {
+					int row = i + dr[dir];
+					int col = j + dc[dir];										
+					if (row >= 0 && col >= 0 && row < n && col < m && matrix[row][col] != -1) {
+						// 맵 밖에 나가지 않고 해당 위치에 시공의 돌풍이 아닌 경우에
+						add_sand[row][col] += sand_value;
+						matrix[i][j] -= sand_value;
+					}
+				}
+			}
+		}
+	}
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			matrix[i][j] += add_sand[i][j];
+		}
+	}
+
+}
+
+
+void clean_stom_up(vector<vector<int>>& matrix, vector<pair<int, int>>& stom_location) {
+
+	pair<int, int> stom_up = stom_location[0];
+	pair<int, int> stom_down = stom_location[1];
+
+	int n = matrix.size();
+	int m = matrix[0].size();
+
+	// 우 상 좌 하
+	int dr[4] = {0, -1, 0, 1};
+	int dc[4] = {1, 0, -1, 0};
+	
+	int dir = 0;
+
+	int row = stom_up.first;
+	int col = stom_up.second;
+
+	int sand_value_buffer = 0;
+	while (1) {		
+		int buffer = 0;
+		int nr = row + dr[dir];
+		int nc = col + dc[dir];
+
+		// 연속적으로 다음 방향에 다음 칸이 벽일 수 있으니 while 이용
+		while (1) {			
+			if (dir >= 4) {
+				// 4가지 방향 전부다 막혓으면 나가기
+				break;
+			}
+			if (nr >= 0 && nc >= 0 && nr < n && nc < m) {
+				break;
+			}
+			else {
+				// 방향 전환
+				dir++;
+				nr = row + dr[dir];
+				nc = col + dc[dir];
+			}			
+		}		
+		if (dir >= 4) {
+			break;
+		}
+
+
+		// 시공의 돌풍에 도달한경우 멈추기
+		if (matrix[nr][nc] == -1) {
+			break;
+		}
+
+		// 밀어내기전 데이터 저장
+		buffer = matrix[nr][nc];
+		
+		// 밀어내기
+		matrix[nr][nc] = sand_value_buffer;
+
+		// 원래 있던 데이터 저장
+		sand_value_buffer = buffer;
+
+		// 한칸 이동하였으니 갱신
+		row = nr;
+		col = nc;
+	}
+}
+
+void clean_stom_down(vector<vector<int>>& matrix, vector<pair<int, int>>& stom_location) {
+
+	pair<int, int> stom_up = stom_location[0];
+	pair<int, int> stom_down = stom_location[1];
+
+	int n = matrix.size();
+	int m = matrix[0].size();
+
+	// 우 하 좌 상
+	int dr[4] = {0, 1, 0, -1};
+	int dc[4] = {1, 0, -1, 0};
+
+	int dir = 0;
+
+	int row = stom_down.first;
+	int col = stom_down.second;
+
+	int sand_value_buffer = 0;
+	while (1) {
+		int buffer = 0;
+		int nr = row + dr[dir];
+		int nc = col + dc[dir];
+
+		// 연속적으로 다음 방향에 다음 칸이 벽일 수 있으니 while 이용
+		while (1) {
+			if (dir >= 4) {
+				// 4가지 방향 전부다 막혓으면 나가기
+				break;
+			}
+			if (nr >= 0 && nc >= 0 && nr < n && nc < m) {
+				break;
+			}
+			else {
+				// 방향 전환
+				dir++;
+				nr = row + dr[dir];
+				nc = col + dc[dir];
+			}
+		}
+		if (dir >= 4) {
+			break;
+		}
+
+
+		// 시공의 돌풍에 도달한경우 멈추기
+		if (matrix[nr][nc] == -1) {
+			break;
+		}
+
+		// 밀어내기전 데이터 저장
+		buffer = matrix[nr][nc];
+
+		// 밀어내기
+		matrix[nr][nc] = sand_value_buffer;
+
+		// 원래 있던 데이터 저장
+		sand_value_buffer = buffer;
+
+		// 한칸 이동하였으니 갱신
+		row = nr;
+		col = nc;
+	}
+}
+
+
+int main() {
+	int n, m, t;
+
+	cin >> n >> m >> t;
+
+	vector<vector<int>> matrix(n, vector<int>(m, 0));
+
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cin >> matrix[i][j];
+		}
+	}
+
+	vector<pair<int, int>> stom_location;
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < 1; j++) {
+			if (matrix[i][j] == -1) {
+				stom_location.push_back({ i,j });
+				break;
+			}
+		}
+	}
+	stom_location.push_back({stom_location[0].first+1, 0});
+
+	for (int i = 0; i < t; i++) {
+		sand_spread(matrix);
+		clean_stom_up(matrix, stom_location);
+		clean_stom_down(matrix, stom_location);
+	}
+
+
+
+	/*
+	cout << endl;
+	cout << endl;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	cout << endl;
+	*/
+
+	// 시공돌풍 -1 2개 고려
+	int answer = 2;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			answer += matrix[i][j];
+		}
+	}
+
+	cout << answer;
+
+	return 0;
+}

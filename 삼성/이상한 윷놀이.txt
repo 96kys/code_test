@@ -1,0 +1,166 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+bool simulation(vector<vector<int>>& matrix, vector<vector<int>>& player_info, vector<vector<vector<int>>>& matrix_info);
+void move(vector<vector<int>>& player_info, vector<vector<vector<int>>>& matrix_info, int index, int row, int col, int nr, int nc);
+void move_reverse(vector<vector<int>>& player_info, vector<vector<vector<int>>>& matrix_info, int index, int row, int col, int nr, int nc);
+
+bool simulation(vector<vector<int>>& matrix, vector<vector<int>>& player_info, vector<vector<vector<int>>>& matrix_info) {
+
+	// 오 왼 위 아
+	int dr[4] = { 0, 0, -1, 1 };
+	int dc[4] = { 1, -1, 0, 0 };
+
+	for (int turn = 0; turn < player_info.size(); turn++) {
+
+		int row = player_info[turn][0];
+		int col = player_info[turn][1];
+		int dir = player_info[turn][2];
+
+
+		int nr = row + dr[dir];
+		int nc = col + dc[dir];
+
+		if (matrix[nr][nc] == 0) {
+			// 이동하려는 곳이 흰색인 경우
+			move(player_info, matrix_info, turn, row, col, nr, nc);
+		}
+		else if (matrix[nr][nc] == 1) {
+			move_reverse(player_info, matrix_info, turn, row, col, nr, nc);
+		}
+		else if (matrix[nr][nc] == 2) {			
+			if (dir % 2 == 0) {
+				dir++;
+			}
+			else {
+				dir--;
+			}
+			player_info[turn][2] = dir;
+
+			nr = row + dr[dir];
+			nc = col + dc[dir];
+
+			if (matrix[nr][nc] == 0) {
+				move(player_info, matrix_info, turn, row, col, nr, nc);
+			}
+			else if (matrix[nr][nc] == 1) {
+				move_reverse(player_info, matrix_info, turn, row, col, nr, nc);
+			}
+			else if (matrix[nr][nc] == 2) {
+				nr = row;
+				nc = col;
+			}
+		}
+
+		if ((int)matrix_info[nr][nc].size() >= 4) {
+			return true;
+		}
+
+	}
+
+
+
+	return false;
+}
+
+
+void move(vector<vector<int>>& player_info, vector<vector<vector<int>>>& matrix_info, int index, int row, int col, int nr, int nc) {
+	vector<int> temp;
+
+	while (1) {
+		temp.push_back(matrix_info[row][col].back());
+		matrix_info[row][col].pop_back();
+		if (temp.back() == index) {
+			break;
+		}
+	}
+	
+	while (!temp.empty()) {
+		int temp_index = temp.back();
+		temp.pop_back();
+
+		player_info[temp_index][0] = nr;
+		player_info[temp_index][1] = nc;
+
+		matrix_info[nr][nc].push_back(temp_index);	
+	}
+
+}
+
+void move_reverse(vector<vector<int>>& player_info, vector<vector<vector<int>>>& matrix_info, int index, int row, int col, int nr, int nc) {
+	queue<int> q;
+	while (1) {
+		q.push(matrix_info[row][col].back());
+		matrix_info[row][col].pop_back();
+		if (q.back() == index) {
+			break;
+		}
+	}
+
+	while (!q.empty()) {
+		int temp_index = q.front();
+		q.pop();
+
+		player_info[temp_index][0] = nr;
+		player_info[temp_index][1] = nc;
+
+		matrix_info[nr][nc].push_back(temp_index);
+	}
+}
+
+
+int main() {
+
+	int n, k;
+	cin >> n >> k;
+
+	vector<vector<int>> matrix(n + 2, vector<int>(n + 2, 2));
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+			cin >> matrix[row][col];
+		}
+	}
+
+	vector<vector<int>> player_info(k, vector<int>(3, 0));
+	for (int i = 0; i < k; i++) {
+		int row, col, dir;
+		cin >> row >> col >> dir;
+		player_info[i][0] = row;
+		player_info[i][1] = col;
+		player_info[i][2] = dir - 1;	
+	}
+		
+
+	vector<vector<vector<int>>> matrix_info(n + 2, vector<vector<int>>(n + 2));
+	for (int i = 0; i < k; i++) {
+		int row = player_info[i][0];
+		int col = player_info[i][1];
+
+		matrix_info[row][col].push_back(i);		
+	}
+
+
+	int answer = 0;
+	while (1) {
+		answer++;
+		if (simulation(matrix, player_info, matrix_info)) {
+			break;
+		}
+
+		if (answer >= 1000) {
+			answer = -1;
+			break;
+		}
+	}
+	cout << answer;
+	
+
+
+	return 0;
+}

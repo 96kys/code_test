@@ -1,0 +1,216 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+int row_size = 3;
+int col_size = 3;
+
+void do_play(vector<vector<int>>& matrix);
+bool compare(pair<int, int> a, pair<int, int>b);
+void play_row(vector<vector<int>>& matrix);
+void play_col(vector<vector<int>>& matrix);
+
+
+
+void do_play(vector<vector<int>>& matrix) {
+
+	if (row_size >= col_size) {
+		play_row(matrix);
+	}
+	else {
+		play_col(matrix);
+	}
+
+}
+
+bool compare(pair<int, int> a, pair<int, int>b) {
+	if (a.second == b.second) {
+		return a.first < b.first;
+	}
+	else {
+		return a.second <  b.second;
+	}
+}
+
+
+
+void play_row(vector<vector<int>>& matrix) {
+
+	vector<vector<int>> temp_matrix(100, vector<int>(100, 0));
+	int temp_col_size = 0;
+	for (int i = 0; i < row_size; i++) {
+
+		map<int, int> num_counting;
+		vector<pair<int, int>> num_cnt;
+		
+		// 격자에 행을 기준으로 데이터를 받는다 ex 1행의 데이터
+		for (int j = 0; j < col_size; j++) {
+			// 혹시나 0을 받아 오류가 생길 수 있음
+			if (matrix[i][j] != 0) {
+				num_counting[matrix[i][j]]++;
+			}					
+		}
+
+		// 만들어진 map에 대상으로 vector형태의 데이터 배열 구성
+		for (auto map_data = num_counting.begin(); map_data != num_counting.end(); map_data++) {
+			num_cnt.push_back({ map_data->first, map_data->second });
+		}
+
+
+		// 출현 빈도수가 적은 순서대로 정렬
+		sort(num_cnt.begin(), num_cnt.end(), compare);
+
+		/*
+		for (int num = 0; num < num_cnt.size(); num++) {
+			cout << "num_cnt[num].first: " << num_cnt[num].first << "    num_cnt[num].second:  " << num_cnt[num].second << endl;
+		}
+		cout << endl;
+		*/
+
+		for (int z = 0; z < 50; z++) {
+			if (z >= num_cnt.size()) {
+				break;;
+			}
+			temp_matrix[i][z * 2] = num_cnt[z].first;
+			temp_matrix[i][z * 2 + 1] = num_cnt[z].second;
+		}
+
+		temp_col_size = max(temp_col_size, (int)num_cnt.size() * 2);
+	}
+
+	col_size = temp_col_size;
+
+	matrix = temp_matrix;
+
+
+}
+
+
+void play_col(vector<vector<int>>& matrix) {
+
+	vector<vector<int>> temp_matrix(100, vector<int>(100, 0));
+	int temp_row_size = 0;
+	for (int j = 0; j < col_size; j++) {
+
+		map<int, int> num_counting;
+		vector<pair<int, int>> num_cnt;
+
+		// 격자에 열을 기준으로 데이터를 받는다 ex 1열의 데이터
+		for (int i = 0; i < row_size; i++) {
+			// 혹시나 0을 받아 오류가 생길 수 있음
+			if (matrix[i][j] != 0) {
+				num_counting[matrix[i][j]]++;
+			}
+		}
+
+		// 만들어진 map에 대상으로 vector형태의 데이터 배열 구성
+		for (auto map_data = num_counting.begin(); map_data != num_counting.end(); map_data++) {
+			num_cnt.push_back({ map_data->first, map_data->second });
+		}
+
+
+		// 출현 빈도수가 적은 순서대로 정렬
+		sort(num_cnt.begin(), num_cnt.end(), compare);
+
+		/*
+		for (int num = 0; num < num_cnt.size(); num++) {
+			cout << "num_cnt[num].first: " << num_cnt[num].first << "    num_cnt[num].second:  " << num_cnt[num].second << endl;
+		}
+		cout << endl;
+		*/
+
+		for (int z = 0; z < 50; z++) {
+			if (z >= num_cnt.size()) {
+				break;;
+			}
+			temp_matrix[z * 2][j] = num_cnt[z].first;
+			temp_matrix[z * 2 + 1][j] = num_cnt[z].second;
+		}
+
+		temp_row_size = max(temp_row_size, (int)num_cnt.size() * 2);
+	}
+
+	row_size = temp_row_size;
+
+	matrix = temp_matrix;
+
+}
+
+
+
+
+
+
+
+
+
+int main() {
+
+	int r, c, target_value;
+	cin >> r >> c >> target_value;
+
+	vector<vector<int>> matrix(100, vector<int>(100, 0));
+
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			cin >> matrix[i][j];
+		}
+	}
+
+	/*
+	cout << endl;
+	cout << endl;
+	for (int i = 0; i < 50; i++) {
+		for (int j = 0; j < 50; j++) {
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	cout << endl;
+	*/
+
+	int answer = 0;
+	while (1) {
+		if (matrix[r - 1][c - 1] == target_value) {
+			break;
+		}
+
+		if (answer > 100) {
+			answer = -1;
+			break;
+		}
+
+		/*
+		cout << endl;
+		cout << endl;
+		for (int i = 0; i < 20; i++) {
+			for (int j = 0; j < 20; j++) {
+				cout << matrix[i][j] << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+		cout << endl;
+		*/
+
+		do_play(matrix);
+		answer++;
+
+	}
+	
+
+	
+
+	
+
+	cout << answer;
+
+
+	return 0;
+}

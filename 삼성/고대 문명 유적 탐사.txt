@@ -1,0 +1,266 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <map>
+#include <queue>
+
+
+using namespace std;
+
+// 구현 function
+// 1. 회전
+// 2. 인접한 조각 찾기
+// 3. 찾은 인접한 조각을 기준으로 최대 보상 찾기.
+// 4. 유적이 사라지고 난뒤 숫자 갱신.
+
+int solution(vector<vector<int>>& matrix, queue<int>& reward);
+void turn_fnc(vector<vector<int>>& matrix, int row, int col, int turn_num);
+int find_matrix(vector<vector<int>>& matrix);
+void bfs(vector<vector<int>>& matrix, int row, int col);
+void update_matrix(vector<vector<int>>& matrix, queue<int>& reward);
+
+
+int solution(vector<vector<int>>& matrix, queue<int>& reward) {// 해당 코드가 찾은 인접한 조각을 기준으로 최대 보상 찾기. 역활을 함
+	int answer = 0;
+
+	vector<vector<int>> matrix_temp = matrix;
+	vector<vector<int>> matrix_max = matrix;
+	int max_reward = 0;
+	// 보상
+	// 1. 유물의 가치를 최대화.	
+	// 2. 다양한 방법이 있는 경우 회전한 각도가 가장 작은 방법.
+	// 3. 회전각도가 같은 경우가 있을 때, 회전 중심 좌표의 열이 가장 작은 구간.
+	// 4. 열이 같은 경우 행이 작은 경우.
+	//
+	// -> 즉 각도가 큰 것 부터, 열좌표가 큰것부터, 행좌표가 큰것부터 탐색을해서 크거나 같으면 갱신
+
+
+
+
+	for (int turn = 3; turn >= 1; turn--) {
+		for (int j = 3; j >= 1; j--) {
+			for (int i = 3; i >= 1; i--) {
+				// i,j 기준 중심을 가지고 turn횟수만큼 회전
+				turn_fnc(matrix_temp, i, j, turn);
+
+				// 획득한 유물이 3개이상인 경우 해당 요소값을 0으로 변경
+				int temp_reward = find_matrix(matrix_temp);
+				if (max_reward <= temp_reward) {
+					max_reward = temp_reward;
+					// 최대 보상을 받아 유물을 획득한 위치의 값이 0인 배열은 matrix_max에 저장
+					matrix_max = matrix_temp;
+				}
+				// 회전한 matrix 초기화
+				matrix_temp = matrix;
+			}
+		}
+	}
+
+
+	//matrix_max -> 최대 보상을 받고 조건까지 부합한 행렬(획득한 유물은 0으로 초기화함)
+	update_matrix(matrix_max, reward);
+
+
+	while (1) {
+		int chain_reward = find_matrix(matrix_max);
+
+		if (chain_reward == 0) {
+			break;
+		}
+		else {
+			max_reward += chain_reward;
+			update_matrix(matrix_max, reward);
+		}
+	}
+
+
+
+	matrix = matrix_max;
+
+	answer = max_reward;
+	return answer;
+}
+
+
+
+
+// 1. 회전
+void turn_fnc(vector<vector<int>>& matrix, int row, int col, int turn_num) {
+
+	for (int t = 0; t < turn_num; t++) {
+
+		//
+		// 1 2 3
+		// 4 5 6
+		// 7 8 9
+		//
+
+		int temp_1 = matrix[row - 1][col - 1]; // 1
+		int temp_2 = matrix[row - 1][col]; // 2
+
+		// 1 -> 7
+		matrix[row - 1][col - 1] = matrix[row + 1][col - 1];
+
+		// 7 -> 9
+		matrix[row + 1][col - 1] = matrix[row + 1][col + 1];
+
+		// 9 -> 3
+		matrix[row + 1][col + 1] = matrix[row - 1][col + 1];
+
+		// 3 -> 1
+		matrix[row - 1][col + 1] = temp_1;
+
+		// 2 -> 4
+		matrix[row - 1][col] = matrix[row][col - 1];
+
+		// 4 -> 8
+		matrix[row][col - 1] = matrix[row + 1][col];
+
+		// 8 -> 6
+		matrix[row + 1][col] = matrix[row][col + 1];
+
+		// 6 -> 2
+		matrix[row][col + 1] = temp_2;
+
+	}
+
+
+}
+
+
+// 2. 인접한 조각 찾기
+int find_matrix(vector<vector<int>>& matrix) {
+	int answer = 0;
+
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			if (matrix[i][j] != 0) {
+				// matrix[i][j]가 0의 값을 가진다는 것은 이미 인접한 요소로 포함되어 제거된 상태임을 뜻함.
+				bfs(matrix, i, j);
+			}
+		}
+	}
+
+	for (int row = 0; row < 5; row++) {
+		for (int col = 0; col < 5; col++) {
+			if (matrix[row][col] == 0) {
+				answer++;
+			}
+		}
+	}
+
+	return answer;
+}
+
+void bfs(vector<vector<int>>& matrix, int row, int col) {
+
+
+
+
+	// 동 남 서 북
+	int dr[4] = { 0, 1, 0, -1 };
+	int dc[4] = { 1, 0, -1, 0 };
+
+	bool visit[5][5] = {};
+	queue<pair<int, int>> q;
+	vector<pair<int, int>> same_index;
+
+	q.push({ row, col });
+	same_index.push_back({ row, col });
+	visit[row][col] = true;
+
+	while (!q.empty()) {
+		pair<int, int> front = q.front();
+
+		int c_r = front.first;
+		int c_c = front.second;
+
+
+		q.pop();
+
+
+		for (int i = 0; i < 4; i++) {
+			// 동 남 서 북 순으로 주변 탐색
+			int nr = c_r + dr[i];
+			int nc = c_c + dc[i];
+			int n = 5;
+			int m = 5;
+
+
+			if (nr >= 0 && nr < 5 && nc >= 0 && nc < 5 && !visit[nr][nc] && matrix[nr][nc] == matrix[row][col]) {
+				// 맵 밖으로 나가지 않는다면 해당 지점 방문
+				visit[nr][nc] = true;
+				same_index.push_back({ nr, nc });
+				q.push({ nr, nc });
+			}
+		}
+	}
+
+	if (same_index.size() >= 3) {
+		for (int i = 0; i < same_index.size(); i++) {
+			// 3개 이상 요소가 근접해 있는 경우에 대해서 제거 처리
+			matrix[same_index[i].first][same_index[i].second] = 0;
+		}
+	}
+}
+
+
+// 4. 유적이 사라지고 난뒤 숫자 갱신.
+void update_matrix(vector<vector<int>>& matrix, queue<int>& reward) {
+
+	for (int j = 0; j < 5; j++) {
+		for (int i = 4; i >= 0; i--) {
+			if (matrix[i][j] == 0) {
+				matrix[i][j] = reward.front();
+				reward.push(reward.front());
+				reward.pop();
+			}
+		}
+	}
+}
+
+
+int main() {
+
+	vector<vector<int>> matrix;
+	queue<int> reward;
+
+	int k = 0;
+	int M = 0;
+
+	cin >> k;
+	cin >> M;
+
+	for (int i = 0; i < 5; i++) {
+		vector<int> temp;
+		for (int j = 0; j < 5; j++) {
+			int num = 0;
+			cin >> num;
+			temp.push_back(num);
+		}
+		matrix.push_back(temp);
+	}
+
+	for (int i = 0; i < M; i++) {
+		int num = 0;
+		cin >> num;
+		reward.push(num);
+	}
+
+	for (int i = 0; i < k; i++) {
+		int answer = 0;
+		answer = solution(matrix, reward);
+		if (answer != 0) {
+			cout << answer << " ";
+		}
+		else {
+			break;
+		}
+	}
+
+
+
+	return 0;
+}
+

@@ -1,0 +1,145 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+#define car_visit 3;
+
+
+
+bool move(vector<vector<int>>& map, pair<int, int>& car_location, int& car_dir) {
+	bool answer = true;
+	queue<int> q;
+
+	// 북쪽 동쪽 남쪽 서쪽
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+	
+	for (int i = 0; i < 4; i++) {
+		q.push((car_dir + 3 - i) % 4);
+		//cout << (car_dir + 3 - i) % 4 << endl;
+	}
+
+	int move_flag = 0; // 0: 이동한적 없음		1: 이동함
+
+	while (!q.empty()) {
+		int row = car_location.first;
+		int col = car_location.second;
+		int dir = q.front();
+		q.pop();
+
+		if (map[row + dr[dir]][col + dc[dir]] == 0) {
+			// 해당 방향이 빈공간이고 방문하지 않은 공간이라면
+			// 해당 방향으로 차량 이동
+			car_location.first = row + dr[dir];
+			car_location.second = col + dc[dir];
+
+			// 차량 방문 유무 갱신
+			map[row + dr[dir]][col + dc[dir]] = car_visit;
+
+			// 차량 방향 갱신.
+			car_dir = dir;
+
+			// 이동 유무 갱신
+			move_flag = 1;
+
+			// 이동하였으니 종료
+			break;
+		}
+		else {
+			// 해당 방향이 빈공간 또는 방문한 공간이면 아무런 행동 x
+		}
+	}
+
+	
+
+	if (move_flag != 1) {
+		// 이동한 적이 없다면. 반대 방향이 비어있는지 확인
+		int dir = (car_dir + 2) % 4;
+		int row = car_location.first;
+		int col = car_location.second;
+
+		if (map[row + dr[dir]][col + dc[dir]] != 1) {
+			car_location.first = row + dr[dir];
+			car_location.second = col + dc[dir];
+		}
+		else {
+			// 이동한 적도 없고 후진도 못한다면 종료.
+			return false;
+		}
+	}
+
+	/*
+	cout << endl;
+	cout << "car row : " << car_location.first << "          car col : " << car_location.second << endl;
+	*/
+
+
+
+	return true;
+}
+
+
+
+
+
+
+int main() {
+
+	int n, m;
+	cin >> n >> m;
+	pair<int, int> car_location = {};
+	int car_dir = 0;
+
+	cin >> car_location.first >> car_location.second >> car_dir;
+
+	vector<vector<int>> map(n, vector<int>(m, 0));
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cin >> map[i][j];
+		}
+	}
+
+	
+	map[car_location.first][car_location.second] = car_visit;
+
+	while (move(map, car_location, car_dir)) {
+
+	}
+	
+	int answer = 0;
+
+	/*
+	cout << endl;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cout << map[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+	
+	
+	
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			if (map[i][j] == 3) {
+				answer++;
+			}			
+		}		
+	}
+	
+
+
+
+	cout << answer;
+	
+
+
+	return 0;
+}

@@ -1,0 +1,143 @@
+#include iostream
+#include string
+#include vector
+#include map
+#include queue
+#include algorithm
+
+using namespace std;
+
+void moving_walk_turn(vectorpairint, bool& moving_walk_value, int n);
+void human_move(vectorpairint, bool& moving_walk_value, int n);
+void human_inser(vectorpairint, bool& moving_walk_value);
+int check_safe(vectorpairint, bool moving_walk_value, int n);
+void n_place_human(vectorpairint, bool& moving_walk_value, int n);
+
+
+
+void moving_walk_turn(vectorpairint, bool& moving_walk_value, int n) {
+	 무빙 워크가 회전 합니다.
+	pairint, bool temp = moving_walk_value.back();
+
+	 2n번째 위치한걸 제거 후 1번 위치로 이동하며 다른 것들을 1칸씩 밀어냄
+	moving_walk_value.pop_back();
+	moving_walk_value.insert(moving_walk_value.begin(), temp);
+
+	 n번 자리에 사람이 있으면 사람 내보내는 함수
+	n_place_human(moving_walk_value, n);
+}
+
+
+void human_move(vectorpairint, bool& moving_walk_value,  int n) {
+	 사람이 앞으로 한칸 움직이는 함수 
+	 실수방지를 위해 true flase 직접 표시
+
+	for (int i = n; i = 0; i--) {
+
+		 해당 무빙워크 위치에 사람이 있다면.
+		if (moving_walk_value[i].second == true) {
+
+			 다음칸의 안정도가 0이 아니고 다음칸에 사람이 없다면.
+			if (moving_walk_value[i + 1].first  0 && moving_walk_value[i + 1].second == false) {
+				 다음칸으로 사람 이동.
+				moving_walk_value[i].second = false;
+				moving_walk_value[i + 1].second = true;
+
+				 다음칸의 안정도 -1
+				moving_walk_value[i + 1].first--;
+
+			}
+		}
+	}
+
+	 n번 자리에 사람이 있으면 사람 내보내는 함수
+	n_place_human(moving_walk_value, n);
+}
+
+void human_inser(vectorpairint, bool& moving_walk_value) {
+	 사람이 첫번째 자리에 사람이 없으면 들어가는 함수.
+	 실수방지를 위해 true flase 직접 표시
+
+	if (moving_walk_value[0].second == false && moving_walk_value[0].first  0) {
+		 첫번째 칸에 사람 추가
+		moving_walk_value[0].second = true;
+
+		 사람 추가로 인해서 해당 칸 안정성 -1
+		moving_walk_value[0].first--;
+	}
+}
+
+int check_safe(vectorpairint, bool moving_walk_value, int n) {
+	 안정성이 0인 칸을 갯수를 확인해 주는 함수.
+	int error_walk = 0;
+
+	for (int i = 0;i  moving_walk_value.size(); i++) {
+		if (moving_walk_value[i].first = 0) {
+			error_walk++;
+		}
+	}
+	return error_walk;
+}
+
+
+void n_place_human(vectorpairint, bool& moving_walk_value, int n) {
+	 무빙워크의 n위치에는 사람을 없앤다.
+	moving_walk_value[n - 1].second = false;
+}
+
+
+int main() {
+
+	int n, k;
+
+	cin  n  k;
+
+	 안정성, 사람이 타있는 유무(ture 사람이 타있는 경우		false 사람이 없는 경우)
+	vectorpairint, bool moving_walk_value;
+
+	for (int i = 0; i  2  n; i++) {
+		int temp;
+		cin  temp;
+		moving_walk_value.push_back({temp, false});
+	}
+
+	int answer = 0;
+	int error_walk = 0;
+
+	while (1) {
+		answer++;
+
+		 무빙워크가 시계방향으로 한칸 회전
+		moving_walk_turn(moving_walk_value, n);
+
+		 사람이 있는 경우 먼저 올라간 순서대로 한칸 이동
+		human_move(moving_walk_value, n);
+
+		 1번자리에 사람을 넣는 함수
+		human_inser(moving_walk_value);
+
+		 안전성이 0인 칸 갯수 갱신
+		error_walk = check_safe(moving_walk_value, n);
+				
+		 디버그용
+		for (int i = 0; i  2  n; i++) {
+			string temp = Noooooo.;
+			if (moving_walk_value[i].second) {
+				temp = yes.;
+			}
+			cout  안정성   moving_walk_value[i].first        사람   temp  endl;
+		}
+		cout  endl  endl  endl  endl  endl  endl;
+		
+
+		if (error_walk = k) {
+			break;
+		}
+	}
+
+	cout  answer;
+
+
+
+	return 0;
+}

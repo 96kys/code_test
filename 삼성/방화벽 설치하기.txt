@@ -1,0 +1,89 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <tuple>
+
+using namespace std;
+
+int answer = 0;
+
+void dfs(vector<vector<int>>& matrix, vector<pair<int, int>>& empty_cells, int start, int cnt);
+void spread_fire(vector<vector<int>>& temp_matrix, queue<pair<int, int>>& fire_queue);
+
+void dfs(vector<vector<int>>& matrix, vector<pair<int, int>>& empty_cells, int start, int cnt) { 
+    if (cnt == 3) {
+        vector<vector<int>> temp_matrix = matrix;
+        queue<pair<int, int>> fire_queue;
+
+        for (int i = 0; i < temp_matrix.size(); i++) {
+            for (int j = 0; j < temp_matrix[0].size(); j++) {
+                if (temp_matrix[i][j] == 2) {
+                    fire_queue.push({i, j});
+                }
+            }
+        }
+
+        spread_fire(temp_matrix, fire_queue);
+
+        int no_fire_area = 0;
+        for (const auto& row : temp_matrix) {
+            no_fire_area += count(row.begin(), row.end(), 0);
+        }
+
+        answer = max(answer, no_fire_area);
+        return;
+    }
+
+    for (int i = start; i < empty_cells.size(); i++) {
+        int r = empty_cells[i].first;
+        int c = empty_cells[i].second;
+        matrix[r][c] = 1;
+        dfs(matrix, empty_cells, i + 1, cnt + 1);
+        matrix[r][c] = 0;
+    }
+}
+
+void spread_fire(vector<vector<int>>& temp_matrix, queue<pair<int, int>>& fire_queue) {
+    static const int dr[4] = {-1, 0, 1, 0};
+    static const int dc[4] = {0, 1, 0, -1};
+
+    while (!fire_queue.empty()) {
+        int r, c;
+        tie(r, c) = fire_queue.front();
+        fire_queue.pop();
+
+        for (int dir = 0; dir < 4; dir++) {
+            int nr = r + dr[dir];
+            int nc = c + dc[dir];
+
+            if (nr >= 0 && nc >= 0 && nr < temp_matrix.size() && nc < temp_matrix[0].size() && temp_matrix[nr][nc] == 0) {
+                temp_matrix[nr][nc] = 2;
+                fire_queue.push({nr, nc});
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+
+    vector<vector<int>> matrix(n, vector<int>(m));
+    vector<pair<int, int>> empty_cells;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> matrix[i][j];
+            if (matrix[i][j] == 0) {
+                empty_cells.push_back({i, j});
+            }
+        }
+    }
+    
+    dfs(matrix, empty_cells, 0, 0);
+
+    cout << answer;
+
+    return 0;
+}

@@ -1,0 +1,269 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <queue>
+#include <algorithm>
+
+
+#define MAX_MAP_SIZE 256
+
+using namespace std;
+
+int n, m;
+int run_time = 0;
+
+void sim(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info);
+void move(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info);
+void put_human(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info, int index);
+int bfs(vector<vector<pair<int, bool>>>& matrix, int start_row, int start_col, int target_row, int target_col);
+void check_goal(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info);
+bool end(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info);
+
+
+
+
+void sim(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info) {
+
+
+	while (!end(matrix, human_info, target_info)) {
+
+		move(matrix, human_info, target_info);
+		check_goal(matrix, human_info, target_info);
+		if (run_time < m) {
+			put_human(matrix, human_info, target_info, run_time);
+
+			/*
+			cout << "맵 정보" << endl;
+			for (int row = 1; row <= n; row++) {
+				for (int col = 1; col <= n; col++) {
+					cout << matrix[row][col].first << " ";
+				}
+				cout << endl;
+			}
+			cout << endl;
+
+			cout << "맵 이동 가능 정보" << endl;
+			for (int row = 1; row <= n; row++) {
+				for (int col = 1; col <= n; col++) {
+					cout << matrix[row][col].second << " ";
+				}
+				cout << endl;
+			}
+			cout << endl;
+
+			vector<vector<int>> human(n + 1, vector<int>(n + 1, 0));
+			for (int i = 0; i < human_info.size(); i++) {
+				human[human_info[i].first][human_info[i].second] = i + 1;
+			}
+
+			cout << "사람 위치" << endl;
+			for (int row = 1; row <= n; row++) {
+				for (int col = 1; col <= n; col++) {
+					cout << human[row][col] << " ";
+				}
+				cout << endl;
+			}
+			cout << endl;
+			*/
+		}
+
+
+
+
+
+		run_time++;
+	}
+
+
+}
+
+void move(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info) {
+
+	// 상 좌 우 하
+	int dr[4] = { -1, 0, 0, 1 };
+	int dc[4] = { 0, -1, 1, 0 };
+
+	int run_size = min((int)human_info.size(), run_time);
+
+	for (int i = 0; i < run_size; i++) {
+		int row = human_info[i].first;
+		int col = human_info[i].second;
+		int target_row = target_info[i].first;
+		int target_col = target_info[i].second;
+
+		int step = bfs(matrix, row, col, target_row, target_col);
+		if (step == 0) {
+			// 목표 위치에 이미 있는 경우
+			continue;
+		}
+
+		int step_buffer = MAX_MAP_SIZE;
+		int min_step = MAX_MAP_SIZE;
+		int min_index = MAX_MAP_SIZE;
+
+		for (int dir = 0; dir < 4; dir++) {
+			int nr = row + dr[dir];
+			int nc = col + dc[dir];
+
+			if (nr >= 1 && nr <= n && nc >= 1 && nc <= n && matrix[nr][nc].second) {
+				// 이동이 가능 하다면
+				step_buffer = bfs(matrix, nr, nc, target_row, target_col);
+				if (min_step > step_buffer) {
+					min_step = step_buffer;
+					min_index = dir;
+				}
+			}
+		}
+
+		if (min_index != MAX_MAP_SIZE && min_step < step) {
+			int nr = row + dr[min_index];
+			int nc = col + dc[min_index];
+
+			human_info[i].first = nr;
+			human_info[i].second = nc;
+		}
+	}
+
+}
+
+void put_human(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info, int index) {
+	int min_range = MAX_MAP_SIZE;
+
+	int target_row = target_info[index].first;
+	int target_col = target_info[index].second;
+
+	int nr, nc;
+
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+
+			if (matrix[row][col].first == 1 && matrix[row][col].second) {
+				// 해당 위치에 베이스 캠프가 있고 해당 위치로 이동이 가능하면
+				int range = bfs(matrix, row, col, target_row, target_col);
+				if (range < min_range) {
+					min_range = range;
+					nr = row;
+					nc = col;
+				}
+			}
+		}
+	}
+
+	human_info[index].first = nr;
+	human_info[index].second = nc;
+	matrix[nr][nc].second = false;
+
+}
+
+
+
+
+int bfs(vector<vector<pair<int, bool>>>& matrix, int start_row, int start_col, int target_row, int target_col) {
+	// a 지점에서 b지점 까지 거리를 최단거리 계산
+
+	vector<vector<bool>> visit(n + 1, vector<bool>(n + 1, true));
+
+	// 상 좌 우 하
+	int dr[4] = { -1, 0, 0, 1 };
+	int dc[4] = { 0, -1, 1, 0 };
+
+	queue<pair<int, int>> q;
+	queue<int> counting;
+
+	q.push({ start_row ,start_col });
+	counting.push(0);
+
+	visit[start_row][start_col] = false;
+
+	while (!q.empty()) {
+		int row = q.front().first;
+		int col = q.front().second;
+		int cnt = counting.front();
+
+		if (row == target_row && col == target_col) {
+			return cnt;
+			break;
+		}
+
+		q.pop();
+		counting.pop();
+
+		for (int dir = 0; dir < 4; dir++) {
+			int nr = row + dr[dir];
+			int nc = col + dc[dir];
+
+			if (nr >= 1 && nr <= n && nc >= 1 && nc <= n && matrix[nr][nc].second && visit[nr][nc]) {
+				q.push({ nr, nc });
+				counting.push(cnt + 1);
+				visit[nr][nc] = false;
+			}
+		}
+	}
+
+	return 15 * 15;
+
+}
+
+void check_goal(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info) {
+
+	for (int i = 0; i < human_info.size(); i++) {
+		int row = human_info[i].first;
+		int col = human_info[i].second;
+		int target_row = target_info[i].first;
+		int target_col = target_info[i].second;
+
+		if (row == target_row && col == target_col) {
+			matrix[row][col].second = false;
+		}
+	}
+}
+
+bool end(vector<vector<pair<int, bool>>>& matrix, vector<pair<int, int>>& human_info, vector<pair<int, int>>& target_info) {
+
+	for (int i = 0; i < human_info.size(); i++) {
+		int row = human_info[i].first;
+		int col = human_info[i].second;
+		int target_row = target_info[i].first;
+		int target_col = target_info[i].second;
+
+		if (row != target_row || col != target_col) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+int main() {
+
+	cin >> n >> m;
+
+	vector<vector<pair<int, bool>>> matrix(n + 1, vector<pair<int, bool>>(n + 1, { 0, true }));
+	for (int row = 1; row <= n; row++) {
+		for (int col = 1; col <= n; col++) {
+			cin >> matrix[row][col].first;
+		}
+	}
+
+	vector<pair<int, int>> human_info(m, { 0, 0 });
+	vector<pair<int, int>> target_info;
+
+	for (int i = 0; i < m; i++) {
+		int row = 0;
+		int col = 0;
+		cin >> row >> col;
+		target_info.push_back({ row, col });
+		matrix[row][col].first = 2;
+	}
+
+
+
+
+	sim(matrix, human_info, target_info);
+
+	cout << run_time;
+
+	return 0;
+}

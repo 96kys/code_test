@@ -1,0 +1,232 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <map>
+
+
+using namespace std;
+
+
+map<string, int> under_num;
+map<string, int> top_num;
+
+
+void trun(vector<vector<int>>& matrix, vector<pair<int, string>>& dice, pair<int, int>& dice_location, int dice_dir);
+void dice_move(vector<pair<int, string>>& dice, int dir);
+
+
+void trun(vector<vector<int>>& matrix, vector<pair<int, string>>& dice, pair<int, int>& dice_location, int dice_dir) {
+
+	// 동 서 북 남
+	int dr[4] = {0, 0, -1, 1};
+	int dc[4] = {1, -1, 0, 0};
+
+	int row = dice_location.first + dr[dice_dir];
+	int col = dice_location.second + dc[dice_dir];
+
+	if (row >= 0 && col >= 0 && row < matrix.size() && col < matrix[0].size()) {
+		// 맵 밖에 안나가는 경우에 대해서
+
+		// 주사위 한칸 이동
+		dice_location.first = row;
+		dice_location.second = col;
+
+		// 주사위 바로보고 있는 방향 갱신
+		dice_move(dice, dice_dir);
+
+		// 현재 주사위 위치에 바닥숫자 확인
+		if (matrix[row][col] == 0) {
+			// 바닥숫자가 0 인경우 바닥숫자를 만나는 주사위숫자로 변경
+			matrix[row][col] = under_num["under"];
+		}
+		else {
+			// 바닥숫자가 0 이 아닌 경우
+			for (int i = 0; i < dice.size(); i++) {
+				// 바닥과 만나는  주사위 찾기
+				if (dice[i].second == "under") {
+					// 바닥과 만나는 주사위 면 숫자 바닥숫자로 갱신
+					dice[i].first = matrix[row][col];
+					under_num["under"] = dice[i].first;
+					matrix[row][col] = 0;
+				}
+			}
+		}
+
+
+		cout << top_num["top"] << endl;
+	}
+
+}
+
+
+
+
+
+
+void dice_move(vector<pair<int, string>>& dice, int dir) {
+
+	for (int i = 0; i < dice.size(); i++) {
+		string dice_type = dice[i].second;
+
+		if (dir == 0) {
+			// 동쪽 이동
+			if (dice_type == "under") {
+				dice[i].second = "left";
+			}
+			else if (dice_type == "top") {
+				dice[i].second = "right";
+			}
+			else if (dice_type == "right") {
+				dice[i].second = "under";
+				under_num["under"] = dice[i].first;
+			}
+			else if (dice_type == "left") {
+				dice[i].second = "top";
+				top_num["top"] = dice[i].first;
+			}
+		}
+		else if (dir == 1) {
+			// 서쪽 이동
+			if (dice_type == "under") {
+				dice[i].second = "right";
+			}
+			else if (dice_type == "top") {
+				dice[i].second = "left";
+			}
+			else if (dice_type == "right") {
+				dice[i].second = "top";
+				top_num["top"] = dice[i].first;
+			}
+			else if (dice_type == "left") {
+				dice[i].second = "under";
+				under_num["under"] = dice[i].first;
+			}
+		}
+		else if (dir == 2) {
+			// 북쪽 이동
+			if (dice_type == "under") {
+				dice[i].second = "front";
+			}
+			else if (dice_type == "top") {
+				dice[i].second = "back";
+			}
+			else if (dice_type == "front") {
+				dice[i].second = "top";
+				top_num["top"] = dice[i].first;
+			}
+			else if (dice_type == "back") {
+				dice[i].second = "under";
+				under_num["under"] = dice[i].first;
+			}
+		}
+		else if (dir == 3) {
+			// 남쪽 이동
+			if (dice_type == "under") {
+				dice[i].second = "back";
+			}
+			else if (dice_type == "top") {
+				dice[i].second = "front";
+			}
+			else if (dice_type == "front") {
+				dice[i].second = "under";
+				under_num["under"] = dice[i].first;
+			}
+			else if (dice_type == "back") {
+				dice[i].second = "top";
+				top_num["top"] = dice[i].first;
+			}
+		}
+	}
+
+}
+
+
+
+
+int main() {
+
+	int n, m, x, y, k;
+	cin >> n >> m >> x >> y >> k;
+
+
+	vector<vector<int>> matrix(n, vector<int>(m, 0));
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cin >> matrix[i][j];
+		}
+	}
+
+	/*
+	cout << endl;
+	cout << endl;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	cout << endl;
+	*/
+
+	// 주사위의 보고있는 방향 저장
+	vector<pair<int, string>> dice;
+	dice.push_back({ 0, "under" });
+	dice.push_back({ 0, "top" });
+	dice.push_back({ 0, "front" });
+	dice.push_back({ 0, "back" });
+	dice.push_back({ 0, "right" });
+	dice.push_back({ 0, "left" });
+
+	// 주사위 바닥과 천장 숫자 기록
+	under_num["under"] = 0;
+	top_num["top"] = 0;
+
+
+	// 주사위 위치 저장
+	pair<int, int> dice_location = { x, y };
+
+
+	// 주사위 이동방향을 저장(1 ~ 4 로 저장하는 것이 아닌 0 ~ 3 으로 저장)
+	vector<int> dice_dir;
+	for (int i = 0; i < k; i++) {
+		int temp;
+		cin >> temp;
+		dice_dir.push_back(temp - 1);
+	}
+
+
+	for (int i = 0; i < k; i++) {
+		// 주사위 이동 반복실행
+		trun(matrix, dice, dice_location, dice_dir[i]);
+
+		/*
+		cout << endl;
+		cout << endl;
+		for (int row = 0; row < n; row++) {
+			for (int col = 0; col < m; col++) {
+				cout << matrix[row][col] << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+
+		cout << "dice dir: " << dice[0].second << "    dice value: " << dice[0].first << endl;
+		cout << "dice dir: " << dice[1].second << "    dice value: " << dice[1].first << endl;
+		cout << "dice dir: " << dice[2].second << "    dice value: " << dice[2].first << endl;
+		cout << "dice dir: " << dice[3].second << "    dice value: " << dice[3].first << endl;
+		cout << "dice dir: " << dice[4].second << "    dice value: " << dice[4].first << endl;
+		cout << "dice dir: " << dice[5].second << "    dice value: " << dice[5].first << endl;
+
+
+		cout << "move dir:  " << dice_dir[i] << endl;;
+		*/
+	}
+
+
+
+	return 0;
+}

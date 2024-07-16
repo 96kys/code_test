@@ -1,0 +1,244 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+void sim(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, pair<int, int>& exit_info);
+void move(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, pair<int, int>& exit_info);
+void find_square(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, pair<int, int>& exit_info);
+void turn(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, int r, int c, int size, pair<int, int>& exit_info);
+void go_exit(vector<pair<int, int>>& user_info, pair<int, int>& exit_info);
+
+int step_sum = 0;
+
+void sim(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, pair<int, int>& exit_info) {
+
+	// 상 하 좌 우
+	int dr[4] = { -1, 1, 0, 0 };
+	int dc[4] = { 0, 0, -1, 1 };
+
+	int map_size = (int)matrix.size();		
+
+	move(matrix, user_info, exit_info);
+	go_exit(user_info, exit_info);
+	find_square(matrix, user_info, exit_info);
+	
+
+}
+
+void move(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, pair<int, int>& exit_info) {
+	// 상 하 좌 우
+	int dr[4] = { -1, 1, 0, 0 };
+	int dc[4] = { 0, 0, -1, 1 };
+
+	int map_size = (int)matrix.size();
+
+	int target_row = exit_info.first;
+	int target_col = exit_info.second;
+
+	for (int user_num = 0; user_num < user_info.size(); user_num++) {
+		int row = user_info[user_num].first;
+		int col = user_info[user_num].second;
+
+		for (int dir = 0; dir < 4; dir++) {
+			int nr = row + dr[dir];
+			int nc = col + dc[dir];
+
+			if (nr >= 0 && nc >= 0 && nr < map_size && nc < map_size && (matrix[nr][nc] == 0 || matrix[nr][nc] == -1)) {
+				int before_range = abs(row - target_row) + abs(col - target_col);
+				int after_range = abs(nr - target_row) + abs(nc - target_col);
+
+				if (before_range > after_range) {
+					user_info[user_num].first = nr;
+					user_info[user_num].second = nc;
+					step_sum++;
+					break;
+				}
+			}
+		}
+	}
+
+	/*
+	cout << endl;
+	for (int user_num = 0; user_num < user_info.size(); user_num++) {
+		cout << "user info ->  " << "  row: " << user_info[user_num].first << "  col: " << user_info[user_num].second << endl;
+	}
+
+	cout << endl;
+	for (int row = 0; row < map_size; row++) {
+		for (int col = 0; col < map_size; col++) {
+			cout << matrix[row][col] << " ";
+		}
+		cout << endl;
+	}
+	*/
+}
+
+
+void find_square(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, pair<int, int>& exit_info) {
+	int map_size = (int)matrix.size();
+
+	int square_size = 100;
+
+	for (int user_num = 0; user_num < user_info.size(); user_num++) {
+		int row = user_info[user_num].first;
+		int col = user_info[user_num].second;
+		int range = max(abs(exit_info.first - row), abs(exit_info.second - col));
+		square_size = min(square_size, range);
+	}
+	
+
+	for (int row = exit_info.first - square_size; row < exit_info.first + 1; row++) {
+		for (int col = exit_info.second - square_size; col < exit_info.second + 1; col++) {
+			// 한 칸씩 움직이면서 가장작은 정사각형 찾기
+
+			if ((row + square_size) < map_size && (col + square_size) < map_size && row >= 0 && col >= 0) {
+				// 사각형이 맵안에 있는경우(맵벗어나지 않게)
+				int nr = row + square_size;
+				int nc = col + square_size;
+
+				bool meet_user = false;
+				if (exit_info.first >= row && exit_info.first <= nr && exit_info.second >= col && exit_info.second <= nc) {
+					// 출구가 사각형 내에 존재한다면
+					for (int user_num = 0; user_num < user_info.size(); user_num++) {
+						int user_row = user_info[user_num].first;
+						int user_col = user_info[user_num].second;
+						if (user_row >= row && user_row <= nr && user_col >= col && user_col <= nc) {
+							// 사각형 내에 유저가 있는 경우
+							meet_user = true;
+						}
+					}
+				}
+				if (meet_user) {
+					turn(matrix, user_info, row, col, square_size, exit_info);
+					return;
+				}
+			}
+		}
+	}
+	
+}
+
+void turn(vector<vector<int>>& matrix, vector<pair<int, int>>& user_info, int r,int c, int size, pair<int, int>& exit_info) {
+	int map_size = (int)matrix.size();
+	vector<vector<int>> user_map(map_size, vector<int>(map_size, 0));
+
+	for (int user_num = 0; user_num < user_info.size(); user_num++) {
+		int row = user_info[user_num].first;
+		int col = user_info[user_num].second;
+		user_map[row][col]++;
+	}
+
+
+	queue<int> user_data;
+	queue<int> map_data;
+
+
+	for (int row = r; row <= r + size; row++) {
+		for (int col = c; col <= c + size; col++) {
+			map_data.push(matrix[row][col]);
+			user_data.push(user_map[row][col]);
+		}
+	}
+
+	for (int col = c + size; col >= c; col--) {
+		for (int row = r; row <= r + size; row++) {
+			if (map_data.front() > 0) {
+				matrix[row][col] = map_data.front() - 1;
+			}
+			else {
+				matrix[row][col] = map_data.front();
+			}
+			user_map[row][col] = user_data.front();
+			map_data.pop();
+			user_data.pop();
+		}
+	}
+
+
+	// 회정한후 유저의 위*1치정보와 출구위치 변수 초기화
+	user_info.clear();	
+	for (int row = 0; row < map_size; row++) {
+		for (int col = 0; col < map_size; col++) {
+			if (user_map[row][col] > 0) {
+				for (int i = 0; i < user_map[row][col]; i++) {
+					pair<int, int> temp;
+					temp.first = row;
+					temp.second = col;
+					user_info.push_back(temp);
+				}
+			}
+			if (matrix[row][col] == -1) {
+				exit_info.first = row;
+				exit_info.second = col;
+			}
+		}
+	}
+}
+
+void go_exit(vector<pair<int, int>>& user_info, pair<int, int>& exit_info) {
+	for (int user_num = 0; user_num < user_info.size(); user_num++) {
+		int row = user_info[user_num].first;
+		int col = user_info[user_num].second;
+
+		if (row == exit_info.first && col == exit_info.second) {
+			user_info.erase(user_info.begin() + user_num);
+			user_num--;
+			//cout << "go_exit" << endl;
+		}
+	}
+
+}
+
+
+int main() {
+
+	int N, M, K;
+	cin >> N >> M >> K;
+
+	vector<vector<int>> matrix(N, vector<int>(N, 0));
+	for (int row = 0; row < N; row++) {
+		for (int col = 0; col < N; col++) {
+			cin >> matrix[row][col];
+		}
+	}
+
+	vector<pair<int, int>> user_info;
+	for (int i = 0; i < M; i++) {
+		pair<int, int> temp;
+		cin >> temp.first >> temp.second;
+		temp.first -= 1;
+		temp.second -= 1;
+		user_info.push_back(temp);
+	}
+
+	pair<int, int> exit_info;
+	cin >> exit_info.first >> exit_info.second;
+	exit_info.first -= 1;
+	exit_info.second -= 1;
+	matrix[exit_info.first][exit_info.second] = -1;
+
+	/*
+	cout << endl;
+	for (int row = 0; row < N; row++) {
+		for (int col = 0; col < N; col++) {
+			cout << matrix[row][col] << " ";
+		}
+		cout << endl;
+	}
+	*/
+
+	for (int i = 0; i < K; i++) {
+		sim(matrix, user_info, exit_info);
+	}
+
+
+	cout << step_sum << endl;
+	cout << exit_info.first+1 << " " << exit_info.second+1;
+
+	return 0;
+}

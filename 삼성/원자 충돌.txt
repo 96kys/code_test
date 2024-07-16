@@ -1,0 +1,200 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+
+using namespace std;
+
+#define trash_data 9
+
+
+void atom_move(vector<vector<int>>& atom_info, vector<vector<int>> map) {
+
+	// 상 상우 우 하우 하 하좌 좌 상좌
+	int dr[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+	int dc[8] = {0, 1, 1, 1, 0, -1, -1, -1};
+
+	int n = map.size();
+
+
+	for (int i = 0; i < atom_info.size(); i++) {
+		int row = atom_info[i][0];
+		int col = atom_info[i][1];
+		int step = atom_info[i][3];
+		int dir = atom_info[i][4];
+
+		int nr = (row + (dr[dir] * step) + (n * 1000)) % n;
+		int nc = (col + (dc[dir] * step) + (n * 1000)) % n;
+
+		atom_info[i][0] = nr;
+		atom_info[i][1] = nc;
+	}
+}
+
+void crash(vector<vector<int>>& atom_info, vector<vector<int>>& map) {
+	int n = map.size();
+
+	// 질량 속도 방향 데이터 합을 가지고 있는 map
+	vector<vector<pair<int,int>>> mass_speed_map(n, vector<pair< int, int>>(n, {0, 0}));
+	vector<vector<int>> dir_map(n, vector<int>(n, trash_data));
+	vector<vector<bool>> dir_map_bool(n, vector<bool>(n, true));
+	vector<vector<int>> atom_cnt(n, vector<int>(n, 0));
+	vector<pair<int, int>> crash_location;
+	vector<int> crash_atom_index;
+	vector<vector<int>> first_atom_index(n, vector<int>(n, 0));
+	
+	for (int i = 0; i < atom_info.size(); i++) {
+		int row = atom_info[i][0];
+		int col = atom_info[i][1];
+		int mass = atom_info[i][2];
+		int step = atom_info[i][3];
+		int dir = atom_info[i][4];
+		
+		
+
+		atom_cnt[row][col]++;
+		
+		if (atom_cnt[row][col] == 1) {
+			first_atom_index[row][col] = i;
+		}
+		else if (atom_cnt[row][col] == 2) {
+			//cout << " 여기서 오류: " << first_atom_index[row][col] << endl;
+			crash_atom_index.push_back(first_atom_index[row][col]);
+			crash_atom_index.push_back(i);
+
+			crash_location.push_back({ row, col });
+		}
+		else if (atom_cnt[row][col] > 2) {
+			crash_atom_index.push_back(i);
+		}
+		
+
+		// 방향 설정
+		if (dir_map[row][col] == trash_data) {
+			// 처음 들어온 데이터 인 경우
+			dir_map[row][col] = dir % 2;
+		}
+		else {
+			if (dir_map[row][col] != dir % 2) {
+				// 이전에 들어온 데이터가 상하좌우 / 대각방향 을 기준으로 비교하였을 때, 다른 경우
+				dir_map_bool[row][col] = false;
+			}
+		}
+
+		
+
+		mass_speed_map[row][col].first += mass;
+		mass_speed_map[row][col].second += step;
+		
+	}
+	
+	
+
+	/*
+	cout << endl;
+	cout << endl;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			cout << mass_speed_map[i][j].first << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	cout << endl;
+	
+	*/
+	
+
+	sort(crash_atom_index.begin(), crash_atom_index.end());
+	for (int i = crash_atom_index.size() - 1; i >= 0; i--) {
+		// 인덱스의 뒷번호 부터 지워야 밀림 현상으로 인한 오제거 방지
+		atom_info.erase(atom_info.begin() + crash_atom_index[i]);
+	}
+	
+
+
+
+	for (int i = 0; i < crash_location.size(); i++) {
+		int row = crash_location[i].first;
+		int col = crash_location[i].second;
+
+		int cnt = atom_cnt[row][col];
+		int mass = mass_speed_map[row][col].first;
+		int speed = mass_speed_map[row][col].second;
+
+		if (mass / 5 >= 1) {
+			// 쪼개진 원자의 질량이 0 이상인 경우
+			int new_mass = mass / 5;
+			int new_speed = speed / cnt;
+			
+					
+
+			// 새로 생긴 원자 추가
+			if (dir_map_bool[row][col]) {
+				int new_dir = 0;
+
+				// 상하좌우/대각방향 기준 충돌원자의 방향이 같은 경우 -> 상하좌우 방향 원소 생성
+				for (int i = 0; i < 4; i++) {
+					atom_info.push_back({ row, col, new_mass, new_speed , new_dir + (2 * i)});
+				}
+			}
+			else {
+				int new_dir = 1;
+
+				// 상하좌우/대각방향 기준 충돌원자의 방향이 다른 경우 -> 대각방향 원소 생성
+				for (int i = 0; i < 4; i++) {
+					atom_info.push_back({ row, col, new_mass, new_speed , new_dir + (2 * i) });
+				}
+			}			
+		}
+	}
+	
+	
+
+}
+
+
+
+int main() {
+
+	int n, m, k;
+	cin >> n >> m >> k;
+
+
+	vector<vector<int>> atom_info;
+
+	for (int i = 0; i < m; i++) {
+		vector<int> temp = {0, 0, 0, 0, 0};
+
+		cin >> temp[0] >> temp[1] >> temp[2] >> temp[3] >> temp[4];
+		temp[0]--;
+		temp[1]--;
+		atom_info.push_back(temp);
+	}
+
+	
+	vector<vector<int>> map(n, vector<int>(n, 0));
+	for (int i = 0; i < m; i++) {
+		map[atom_info[i][0]][atom_info[i][1]] = atom_info[i][2];
+	}
+
+	
+	for (int i = 0; i < k; i++) {
+		atom_move(atom_info, map);
+		crash(atom_info, map);
+	}
+	
+	int answer = 0;
+	for (int i = 0; i < atom_info.size(); i++) {
+		//cout << atom_info[i][2] << endl;
+		answer += atom_info[i][2];
+	}
+	
+	cout << answer;
+	
+
+
+	return 0;
+}

@@ -1,0 +1,211 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+int answer = 0;
+
+int find_road(vector<vector<pair<int, bool>>> matrix, int L) {
+	int map_size = matrix.size();
+
+
+	for (int row = 0; row < map_size; row++) {
+		vector<pair<int, bool>> temp_road = matrix[row];
+		vector<bool> road_pass(map_size, false);
+
+		road_pass[0] = true;
+		for (int i = 0; i < map_size - 1; i++) {
+			if (temp_road[i].first == temp_road[i + 1].first) {
+				road_pass[i + 1] = true;
+			}
+			else {
+				int high = temp_road[i + 1].first - temp_road[i].first;
+				if (high == 1 && (i - L + 1) >= 0) {
+					for (int index = i; index >= (i - L + 1); index--) {
+						if (temp_road[i].first == temp_road[index].first && !temp_road[index].second) {
+
+						}
+						else {
+							break;
+						}
+
+						if (index == (i - L + 1)) {
+							for (int j = i; j >= (i - L + 1); j--) {
+								temp_road[j].second = true;
+							}
+							road_pass[i] = true;
+							road_pass[i + 1] = true;
+						}						
+					}
+				}				
+				else if(high == -1 && (i + L) < map_size){
+					for (int index = i + 1; index <= (i + L); index++) {
+						if (temp_road[i + 1].first == temp_road[index].first && !temp_road[index].second) {
+							
+						}
+						else {
+							break;
+						}
+
+						if (index == (i + 1 + L) - 1) {
+							for (int j = i + 1; j < (i + 1 + L); j++) {
+								temp_road[j].second = true;
+							}
+							road_pass[i] = true;
+							road_pass[i + 1] = true;
+						}
+					}
+
+				}
+				else {
+					break;
+				}
+
+			}
+			if (!road_pass[i + 1]) {
+				break;
+			}
+		}
+
+		/*
+		for (int i = 0; i < map_size; i++) {
+			cout << temp_road[i].first << " ";
+		}
+		cout << endl;
+		for (int i = 0; i < map_size; i++) {
+			cout << temp_road[i].second << " ";
+		}
+		cout << endl;
+		for (int i = 0; i < map_size; i++) {
+			cout << road_pass[i] << " ";
+		}
+		cout << endl;
+		cout << endl;
+		*/
+
+		if (road_pass[map_size - 1]) {
+			answer++;
+		}
+	}
+
+	for (int col = 0; col < map_size; col++) {
+		vector<pair<int, bool>> temp_road(map_size);
+		for (int row = 0; row < map_size; row++) {
+			temp_road[row] = matrix[row][col];
+		}
+		vector<bool> road_pass(map_size, false);
+
+		road_pass[0] = true;
+		for (int i = 0; i < map_size - 1; i++) {
+			if (temp_road[i].first == temp_road[i + 1].first) {
+				road_pass[i + 1] = true;
+			}
+			else {
+				int high = temp_road[i + 1].first - temp_road[i].first;
+				if (high == 1 && (i - L + 1) >= 0) {
+					for (int index = i; index >= (i - L + 1); index--) {
+						if (temp_road[i].first == temp_road[index].first && !temp_road[index].second) {
+
+						}
+						else {
+							break;
+						}
+
+						if (index == (i - L + 1)) {
+							for (int j = i; j >= (i - L + 1); j--) {
+								temp_road[j].second = true;
+							}
+							road_pass[i] = true;
+							road_pass[i + 1] = true;
+						}
+					}
+				}
+				else if (high == -1 && (i + L) < map_size) {
+					for (int index = i + 1; index <= (i + L); index++) {
+						if (temp_road[i + 1].first == temp_road[index].first && !temp_road[index].second) {
+
+						}
+						else {
+							break;
+						}
+
+						if (index == (i + 1 + L) - 1) {
+							for (int j = i + 1; j < (i + 1 + L); j++) {
+								temp_road[j].second = true;
+							}
+							road_pass[i] = true;
+							road_pass[i + 1] = true;
+						}
+					}
+
+				}
+				else {
+					break;
+				}
+
+			}
+			if (!road_pass[i + 1]) {
+				break;
+			}
+		}
+
+		/*
+		for (int i = 0; i < map_size; i++) {
+			cout << temp_road[i].first << " ";
+		}
+		cout << endl;
+		for (int i = 0; i < map_size; i++) {
+			cout << temp_road[i].second << " ";
+		}
+		cout << endl;
+		for (int i = 0; i < map_size; i++) {
+			cout << road_pass[i] << " ";
+		}
+		cout << endl;
+		cout << endl;
+		*/
+
+		if (road_pass[map_size - 1]) {
+			answer++;
+		}
+	}
+
+
+
+
+	return answer;
+}
+
+
+int main() {
+	int n, L;
+	cin >> n >> L;
+
+	vector<vector<pair<int, bool>>> matrix(n, vector<pair<int, bool>>(n, {0,false}));
+	for (int row = 0; row < n; row++) {
+		for (int col = 0; col < n; col++) {
+			cin >> matrix[row][col].first;
+		}
+	}
+
+	/*
+	cout << endl;
+	for (int row = 0; row < n; row++) {
+		for (int col = 0; col < n; col++) {
+			cout << matrix[row][col].first << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+
+	find_road(matrix, L);
+
+	cout << answer;
+
+	return 0;
+}

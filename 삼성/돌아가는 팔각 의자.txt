@@ -1,0 +1,116 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+#define clock 1
+#define reverse_clock -1
+#define offset -1
+
+#define close_rigth 2
+#define close_left 6
+
+
+
+void turn_clock(vector<vector<int>>& table, int index) {
+	
+	int temp = table[index].back();
+	table[index].pop_back();
+	table[index].insert(table[index].begin(), temp);
+}
+
+
+void turn_clock_reverse(vector<vector<int>>& table, int index) {
+
+	int temp = table[index].front();
+	table[index].erase(table[index].begin());
+	table[index].push_back(temp);
+}
+
+
+void bfs(vector<vector<int>>& table, int start_index, int trun_type) {
+	// 방문 유무 배열		0: 미방문	1:방문
+	vector<int> visit(4, 0);
+	queue<pair<int, int>> q;
+	q.push({ start_index ,trun_type });
+
+	// 시작지점 방문
+	visit[start_index] = 1;
+
+	while (!q.empty()) {
+		int index = q.front().first;
+		int turn_type_index = q.front().second;
+		q.pop();
+
+		if (index + 1 < 4) {
+			if (table[index][close_rigth] != table[index + 1][close_left] && !visit[index + 1]) {
+				q.push({ index + 1, turn_type_index * -1 });
+				visit[index + 1] = 1;
+			}
+		}
+
+		if (index - 1 >= 0) {
+			if (table[index][close_left] != table[index - 1][close_rigth] && !visit[index - 1]) {
+				q.push({ index - 1 ,turn_type_index * -1 });
+				visit[index - 1] = 1;
+			}
+		}
+
+		if (turn_type_index == clock) {
+			turn_clock(table, index);
+		}
+		else if (turn_type_index == reverse_clock) {
+			turn_clock_reverse(table, index);
+		}
+	}
+}
+
+
+int main() {
+
+	vector<vector<int>> table(4, vector<int>(8, 0));
+	vector<string> table_string;
+
+	
+	for (int i = 0; i < 4; i++) {
+		string temp;
+		getline(cin, temp);
+		table_string.push_back(temp);
+	}
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 8; j++) {
+			table[i][j] = (int)table_string[i][j] - '0';
+		}
+	}	
+	
+	int k;
+	cin >> k;
+
+	vector<pair<int, int>> order;
+
+	for (int i = 0; i < k; i++) {
+		pair<int, int> temp;
+		cin >> temp.first >> temp.second;
+		order.push_back(temp);
+	}
+	
+
+
+	for (int turn_cnt = 0; turn_cnt < k; turn_cnt++) {
+		bfs(table, order[turn_cnt].first + offset, order[turn_cnt].second);
+	}
+
+	int mul = 1;
+	int answer = 0;
+	for (int i = 0; i < 4; i++) {
+		answer += table[i][0] * mul;
+		mul *= 2;
+	}
+	cout << answer;
+
+	return 0;
+}

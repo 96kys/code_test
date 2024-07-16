@@ -1,0 +1,224 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+void turn_dart(vector<vector<pair<int, bool>>>& dart, int turn_dart, int turn_dir, int turn_time);
+void turn_clock(vector<vector<pair<int, bool>>>& dart, int index);
+void turn_reverse_clock(vector<vector<pair<int, bool>>>& dart, int index);
+void find_closer(vector<vector<pair<int, bool>>>& dart);
+
+int sum = 0;
+
+// 고려사항.
+// 1. 회전 정보에서 제공하는 원판 종류의 경우 해당 값의 배수를 사용해야함 ex) 2를 제공한다면 2, 4, 6, 8... 에 해당하는 원판 전부 회전
+// 2. 인전한 수를 찾아 제거 할 때 0으로 계산 즉 0 은 없는 번호로 생각
+
+void turn_dart(vector<vector<pair<int, bool>>>& dart, int turn_dart, int turn_dir, int turn_time) {
+
+
+	for (int i = 0; i < dart.size(); i++) {
+		// 배열은 0부터 시작이니 해당 값이 0을 나누어 오류가 날 수 있으므로 1부터 시작하게 보전(2 ≤ x ≤ n 이지만 일단 넣어둠)
+		/*
+		cout << endl;
+		cout << "i + 1: " << i + 1 << "   turn_dart + 1: " << turn_dart + 1;
+		cout << endl;
+		*/
+
+		if (((i + 1) % (turn_dart + 1)) == 0) {
+			// 회전해야하는 판인 경우
+			for (int time = 0; time < turn_time; time++) {
+				if (turn_dir == 0) {
+					// 시계 방향
+					turn_clock(dart, i);
+					//cout << " do clock ";
+				}
+				else {
+					// 반 시계 방향
+					turn_reverse_clock(dart, i);
+					//cout << " do reverse clock ";
+				}
+			}
+		}
+	}
+}
+
+
+void turn_clock(vector<vector<pair<int, bool>>>& dart, int index) {
+	// 맨 뒤에 데이터를 앞으로
+	pair<int, bool> temp = dart[index].back();
+	dart[index].pop_back();
+	dart[index].insert(dart[index].begin(), temp);
+}
+
+void turn_reverse_clock(vector<vector<pair<int, bool>>>& dart, int index) {
+	// 맨 앞 데이터를 맨 뒤로
+	pair<int, bool> temp = dart[index].front();
+	dart[index].erase(dart[index].begin());
+	dart[index].push_back(temp);
+}
+
+
+
+void find_closer(vector<vector<pair<int, bool>>>& dart) {
+	int n = dart.size();
+	int m = dart[0].size();
+		
+	// 사각형으로 보는데 좌우의 경우 좌 끝과 우 끝이 이어지는 사각형으로 인식하여 계산.
+	// BUT!! 상 하 는 이어지면 안됨.
+	// 상 우 하 좌
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+
+	// 한번이라도 인접한 수가 같아 지운적이 있는지에 대해 -> ㅅture: 있다면 지우고 다트 정보 갱신		flase: 없다면 원판의 적혀있는 수를 정규화
+	bool erase_flag = false;
+
+	// 정규화를 위해
+	// data_cnt -> 해당 숫자가 0이라는 것은 다트에 모든 수가 지워진 것을 의미하여 정규화를 하지 않음.
+	vector<vector<bool>> temp_dart(n, vector<bool>(m, true));
+	for (int row = 0; row < dart.size(); row++) {
+		for (int col = 0; col < dart[0].size(); col++) {
+			temp_dart[row][col] = dart[row][col].second;
+		}
+	}
+
+
+	int data_cnt = 0;
+	sum = 0;
+
+	for (int row = 0; row < dart.size(); row++) {
+		for (int col = 0; col < dart[0].size(); col++) {
+			// 정규화를 위한 데이터 준비.
+			if (dart[row][col].second != false) {
+				sum += dart[row][col].first;
+				data_cnt++;
+			}
+
+			for (int dir = 0; dir < 4; dir++) {
+				// col의 경우 좌끝과 우끝이 연결 되어있으므로 해당 조건 처리
+				int nr = row + dr[dir];
+				int nc = (col + dc[dir]) % m;
+
+				if (nr >= 0 && nc >= 0 && nr < n && nc < m && dart[nr][nc].second != false && dart[row][col] == dart[nr][nc]) {
+					// 맵 밖에 데이터가 아니고 해당 데이터가 이미지워진 데이터가 아닌 경우에 대해서
+					// 인접한 데이터가 같은 경우 0으로 처리
+					temp_dart[row][col] = false;
+					temp_dart[nr][nc] = false;
+					erase_flag = true;
+				}
+			}
+		}
+	}
+
+	for (int row = 0; row < dart.size(); row++) {
+		for (int col = 0; col < dart[0].size(); col++) {
+			if (dart[row][col].second != temp_dart[row][col]) {
+				dart[row][col].second = temp_dart[row][col];
+			}
+			
+		}
+	}
+
+	/*
+	cout << endl;
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cout << dart[i][j].second << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+	*/
+
+
+	if (!erase_flag) {
+		if (data_cnt > 0) {
+			int average_data = sum / data_cnt;
+			for (int row = 0; row < dart.size(); row++) {
+				for (int col = 0; col < dart[0].size(); col++) {
+					if (dart[row][col].second && dart[row][col].first > average_data) {
+						dart[row][col].first--;
+					}
+					else if (dart[row][col].second && dart[row][col].first < average_data) {
+						dart[row][col].first++;
+					}
+				}
+			}
+		}
+	}
+
+	sum = 0;
+	for (int row = 0; row < dart.size(); row++) {
+		for (int col = 0; col < dart[0].size(); col++) {
+			if (dart[row][col].second) {
+				sum += dart[row][col].first;
+			}
+		}
+	}
+
+
+}
+
+
+int main() {
+
+	int n, m, q;
+	cin >> n >> m >> q;
+
+	// row, col 데이터의 first -> 다트에 적힌 수  second -> 지워진 유무
+	vector<vector<pair<int, bool>>> dart(n, vector<pair<int, bool>>(m, {0, true}));
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			cin >> dart[i][j].first;
+		}
+	}
+
+	// 회정 정보 -> 회전하는 원판 종류, 회전 방향, 회전 칸수
+	// 회전 방향 -  0: 시계		1: 반시계
+	vector<vector<int>> turn_info(q, vector<int>(3, 0));
+	for (int i = 0; i < q; i++) {
+		cin >> turn_info[i][0] >> turn_info[i][1] >> turn_info[i][2];
+	}
+	for (int i = 0; i < q; i++) {
+		// 배열 index에 맞게 조정
+		turn_info[i][0]--;
+	}
+
+
+	for (int play = 0; play < q; play++) {
+		turn_dart(dart, turn_info[play][0], turn_info[play][1], turn_info[play][2]);
+
+		/*
+		cout << endl;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
+				cout << dart[i][j].first << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+		*/
+
+		find_closer(dart);
+
+		/*
+		cout << endl;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
+				cout << dart[i][j].first << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;
+		*/
+	}
+
+
+	cout << sum;
+
+	return 0;
+}

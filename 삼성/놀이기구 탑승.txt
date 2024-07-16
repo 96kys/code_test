@@ -1,0 +1,199 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+
+void student_lnput(vector<vector<int>> student, vector<vector<int>>& matrix, int studen_index, int n);
+int check_like_student(vector<vector<int>> student, vector<vector<int>>& matrix, int row, int col, int index, int n);
+int check_balnk(vector<vector<int>> student, vector<vector<int>>& matrix, int row, int col, int index, int n);
+
+
+void student_lnput(vector<vector<int>> student, vector<vector<int>>& matrix, int studen_index, int n) {
+	int max_like_student = 0;
+	int max_blank = 0;
+	int max_index[2] = {0, 0};
+
+	for (int i = n-1; i >= 0; i--) {
+		for (int j = n-1; j >= 0; j--) {
+
+			if (matrix[i][j] == 0) {
+				// 해당 칸이 비어있을 때
+				int like_student = check_like_student(student, matrix, i, j, studen_index, n);
+				int blank = check_balnk(student, matrix, i, j, studen_index, n);
+
+				if (like_student > max_like_student) {
+					// 좋아하는 학생수를 최대값으로 가질 경우
+					max_index[0] = i;
+					max_index[1] = j;
+					max_like_student = like_student;
+					max_blank = blank;
+
+				}
+				else if (like_student == max_like_student && blank >= max_blank) {
+					// 좋아하는 학생수가 최대값고 같으나 주변 빈공간의 갯수가 더 많거나 같은경우
+					// 현재 값이 이전 최대값보가 행, 열 번호가 작으니 현재값이 최고의 위치로 선정됨
+					max_index[0] = i;
+					max_index[1] = j;
+					max_like_student = like_student;
+					max_blank = blank;
+				}
+			}
+		}
+	}
+
+	matrix[max_index[0]][max_index[1]] = student[studen_index][0];	
+
+}
+
+
+int check_like_student(vector<vector<int>> student, vector<vector<int>>& matrix,int row,int col, int index, int n) {
+	// 상 우 하 좌
+	int dr[4] = {-1, 0, 1, 0};
+	int dc[4] = {0, 1, 0, -1};
+	int answer = 0;
+
+
+	for (int i = 0; i < 4; i++) {
+		// 4개 방향 -> 상 우 하 좌 순으로 확인
+		if (row + dr[i] >= 0 && col + dc[i] >= 0 && row + dr[i] < n && col + dc[i] < n) {
+			// 맵 안에 대해서만 계산.
+			for (int j = 1; j < 5; j++) {
+				if (matrix[row + dr[i]][col + dc[i]] == student[index][j]) {
+					// 해당 위치에 내가 좋아하는 학생이 있는 경우 +1
+					answer++;
+				}
+			}
+		}
+
+	}
+
+
+
+
+	return answer;
+}
+
+int check_balnk(vector<vector<int>> student, vector<vector<int>>& matrix, int row, int col, int index, int n) {
+	// 상 우 하 좌
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+	int answer = 0;
+
+
+	for (int i = 0; i < 4; i++) {
+		// 4개 방향 -> 상 우 하 좌 순으로 확인
+		if (row + dr[i] >= 0 && col + dc[i] >= 0 && row + dr[i] < n && col + dc[i] < n) {
+			// 맵 안에 대해서만 계산.
+			for (int j = 1; j < 5; j++) {
+				if (matrix[row + dr[i]][col + dc[i]] == 0) {
+					// 해당 위치가 비어 있는 경우 +1
+					answer++;
+				}
+			}
+		}
+
+	}
+
+	return answer;
+}
+
+int cal_score(vector<vector<int>> student, vector<vector<int>>& matrix, int n) {
+	// 상 우 하 좌
+	int dr[4] = { -1, 0, 1, 0 };
+	int dc[4] = { 0, 1, 0, -1 };
+	int answer = 0;
+	int index = 0;
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			for (int k = 0; k < student.size(); k++) {
+				if (student[k][0] == matrix[i][j]) {
+					index = k;
+					int like_student = check_like_student(student, matrix, i, j, index, n);
+
+					switch (like_student)
+					{
+					case 0:
+						answer += 0;
+						break;
+
+					case 1:
+						answer += 1;
+						break;
+						
+					case 2:
+						answer += 10;
+						break;
+
+					case 3:
+						answer += 100;
+						break;
+
+					case 4:
+						answer += 1000;
+						break;
+
+					default:
+						cout << "error";
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return answer;
+}
+
+
+
+int main() {
+	
+	int n;
+	cin >> n;
+
+	vector<vector<int>> student;
+	vector<vector<int>> matrix(n, vector<int>(n, 0));
+
+	for (int i = 0; i < n * n; i++) {
+		vector<int> temp;
+		for (int j = 0; j < 5; j++) {			
+			int value;
+			cin >> value;
+			temp.push_back(value);
+		}
+		student.push_back(temp);
+	}
+
+
+
+
+	for (int i = 0; i < n * n; i++) {
+		student_lnput(student, matrix, i, n);
+
+
+		/* 디버그용
+		cout << endl;
+		cout << endl;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				cout << matrix[i][j] << " ";
+			}
+			cout << endl;
+		}
+		*/
+	}
+	
+
+	int answer = cal_score(student, matrix, n);
+	cout << answer;
+
+
+
+	return 0;
+}

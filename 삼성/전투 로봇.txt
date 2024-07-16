@@ -1,0 +1,126 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+bool sim(vector<vector<int>>& matrix, int& monster_cnt, vector<int>& robot_info);
+int bfs(vector<vector<int>>& matrix, int& monster_cnt, vector<int>& robot_info);
+void check_level(vector<int>& robot_info);
+
+int total_time = 0;
+
+bool sim(vector<vector<int>>& matrix, int& monster_cnt, vector<int>& robot_info) {
+    if (monster_cnt == 0) {
+        return false;
+    }
+
+    int time = bfs(matrix, monster_cnt, robot_info);
+    if (time == 0) {
+        return false; // No more moves possible
+    }
+
+    total_time += time;
+    check_level(robot_info);
+
+    return true;
+}
+
+int bfs(vector<vector<int>>& matrix, int& monster_cnt, vector<int>& robot_info) {
+    int n = matrix.size();
+    vector<vector<bool>> visit(n, vector<bool>(n, false));
+    queue<pair<int, int>> q;
+    queue<int> cnting;
+    
+    q.push({robot_info[1], robot_info[2]});
+    cnting.push(0);
+    visit[robot_info[1]][robot_info[2]] = true;
+
+    const int dr[4] = { -1, 0, 0, 1 };
+    const int dc[4] = { 0, -1, 1, 0 };
+
+    bool find_flag = false;
+    int target_row = -1, target_col = -1;
+    int min_dist = 9999;
+
+    while (!q.empty()) {
+        int row = q.front().first;
+        int col = q.front().second;
+        int cnt = cnting.front();
+        q.pop();
+        cnting.pop();
+
+        for (int dir = 0; dir < 4; ++dir) {
+            int nr = row + dr[dir];
+            int nc = col + dc[dir];
+
+            if (nr >= 0 && nc >= 0 && nr < n && nc < n && !visit[nr][nc] && matrix[nr][nc] <= robot_info[0]) {
+                q.push({nr, nc});
+                cnting.push(cnt + 1);
+                visit[nr][nc] = true;
+
+                if (matrix[nr][nc] > 0 && matrix[nr][nc] < robot_info[0]) {
+                    if (cnt + 1 < min_dist || (cnt + 1 == min_dist && (nr < target_row || (nr == target_row && nc < target_col)))) {
+                        target_row = nr;
+                        target_col = nc;
+                        min_dist = cnt + 1;
+                        find_flag = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if (find_flag) {
+        int row = robot_info[1];
+        int col = robot_info[2];
+        matrix[target_row][target_col] = 9;
+        robot_info[1] = target_row;
+        robot_info[2] = target_col;
+        robot_info[3]++;
+        matrix[row][col] = 0;
+        monster_cnt--;
+
+        return min_dist;
+    }
+
+    return 0;
+}
+
+void check_level(vector<int>& robot_info) {
+    if (robot_info[0] == robot_info[3]) {
+        robot_info[0]++;
+        robot_info[3] = 0;
+    }
+}
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<vector<int>> matrix(n, vector<int>(n, 0));
+    for (int row = 0; row < n; ++row) {
+        for (int col = 0; col < n; ++col) {
+            cin >> matrix[row][col];
+        }
+    }
+
+    int monster_cnt = 0;
+    vector<int> robot_info; // {level, row, col, kill_score}
+    for (int row = 0; row < n; ++row) {
+        for (int col = 0; col < n; ++col) {
+            if (matrix[row][col] > 0 && matrix[row][col] < 9) {
+                monster_cnt++;
+            } else if (matrix[row][col] == 9) {
+                robot_info = {2, row, col, 0};
+                matrix[row][col] = 0; // Clear initial robot position
+            }
+        }
+    }
+
+    while (sim(matrix, monster_cnt, robot_info)) {}
+
+    cout << total_time << endl;
+    return 0;
+}

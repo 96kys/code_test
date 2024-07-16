@@ -1,0 +1,132 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+
+void sim(const vector<pair<int, int>>& memory_error_info, int n, int h, int m);
+void dfs(vector<int>& customer_index, vector<vector<bool>>& line_data, int cnt, vector<vector<bool>>& visit, int start_row, int start_col);
+
+int answer = 999;
+
+void sim(const vector<pair<int, int>>& memory_error_info, int n, int h, int m) {
+
+	vector<int> customer_index;
+	for (int i = 0; i < n; i++) {
+		customer_index.push_back(i);
+	}
+
+	// 유실선의 위치 정보를 가지고 있는 변수
+	vector<vector<bool>> line_data(h, vector<bool>(n - 1, true));
+
+	for (int i = 0; i < m; i++) {
+		int row = memory_error_info[i].first;
+		int col = memory_error_info[i].second;
+
+		line_data[row][col] = false;
+	}
+	vector<vector<bool>> visit = line_data;
+
+
+	dfs(customer_index, line_data, 0, visit, 0, 0);
+
+}
+
+
+void dfs(vector<int>& customer_index, vector<vector<bool>>& line_data, int cnt, vector<vector<bool>>& visit, int start_row, int start_col) {
+	if (cnt > 3 || cnt >= answer) {
+		return;
+	}
+	vector<int> temp_customer_index = customer_index;
+
+	for (int row = 0; row < line_data.size(); row++) {
+		for (int col = 0; col < line_data[0].size(); col++) {
+			if (!line_data[row][col]) {
+				// 유실선이 있는 경우
+				int temp = temp_customer_index[col];
+				temp_customer_index[col] = temp_customer_index[col + 1];
+				temp_customer_index[col + 1] = temp;
+			}
+		}
+	}
+
+	/*
+	cout << endl;
+	for (int row = 0; row < line_data.size(); row++) {
+		for (int col = 0; col < line_data[0].size(); col++) {
+			cout << line_data[row][col] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+
+	cout << endl;
+	for (int i = 0; i < customer_index.size(); i++) {
+		cout << temp_customer_index[i] << "  ";
+	}
+	cout << endl;
+	*/
+
+	for (int i = 0; i < customer_index.size(); i++) {
+		if (temp_customer_index[i] != i) {
+			break;
+		}
+
+		if (i == temp_customer_index.size() - 1) {
+			answer = min(answer, cnt);
+			return;
+		}
+	}
+
+	for (int row = start_row; row < line_data.size(); row++) {
+		for (int col = (row == start_row ? start_col : 0); col < line_data[0].size(); col++) {
+			if (line_data[row][col] && visit[row][col]) {
+				int left_index = max(col - 1, 0);
+				int right_index = min(col + 1, (int)line_data[0].size() - 1);
+
+				if (line_data[row][left_index] && line_data[row][right_index]) {
+					line_data[row][col] = false;
+					visit[row][col] = false;
+					dfs(customer_index, line_data, cnt + 1, visit, row, col);
+					line_data[row][col] = true;
+					visit[row][col] = true;
+				}
+			}
+		}
+	}
+
+}
+
+
+
+
+
+int main() {
+
+	int n, h, m;
+	cin >> n >> m >> h;
+
+	vector<pair<int, int>> memory_error_info;
+
+	for (int i = 0; i < m; i++) {
+		pair<int, int> temp;
+		cin >> temp.first >> temp.second;
+		temp.first--;
+		temp.second--;
+		memory_error_info.push_back(temp);
+	}
+
+	sim(memory_error_info, n, h, m);
+
+	if (answer == 999) {
+		answer = -1;
+	}
+
+	cout << answer;
+
+	return 0;
+}
