@@ -1,0 +1,31 @@
+#include <string>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+int solution(vector<vector<string>> clothes) {
+    int answer = 1;
+    map<string, int> clothes_cnt;
+    vector<int> temp;
+    
+    // 종류별 갯수를 저장
+    for(int i = 0;i<clothes.size();i++){
+        clothes_cnt[clothes[i][1]]++;
+    }
+    
+    // 1차원 vector에 갯수 저장
+    for(auto iter = clothes_cnt.begin();iter != clothes_cnt.end();iter++){
+        temp.push_back(iter->second + 1);
+    }
+    
+    // 종류 경우의수 계산
+    for(int i = 0;i<temp.size();i++){
+        answer *= temp[i];
+    }
+    
+    // 아무꺼도 안입은 경우 제거
+    answer--;
+    
+    return answer;
+}

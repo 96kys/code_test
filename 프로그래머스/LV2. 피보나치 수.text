@@ -1,0 +1,27 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int n) {
+    int answer = 0;
+    vector<int> F;
+    // F(0) = 0
+    F.push_back(0);
+    // F(1) = 1
+    F.push_back(1);
+    
+    int index = 2;
+    
+    // F(n) = F(n-1) + F(n-2) 식 구현
+    while(index != n+1){
+        F.push_back((F[index-1] + F[index-2])%1234567);
+        index++;
+    }
+    
+    answer = F[F.size() - 1]%1234567;
+    
+    
+    
+    return answer;
+}

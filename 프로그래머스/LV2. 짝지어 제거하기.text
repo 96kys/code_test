@@ -1,0 +1,40 @@
+#include <iostream>
+#include<string>
+using namespace std;
+
+int solution(string s)
+{
+    int answer = 0;
+    int erase_flag = 1;
+    int index = -1;
+    string temp = "";
+    
+    
+    // 배열 탐색하였을 때 제거가 가능한 알파벳이 있는경우 erase_flag = 1 아닌경우 erase_flag = 0
+    while(erase_flag == 1 && s.size()>=2){
+        erase_flag = 0;
+        
+        // 같은 문자가 붙어 있는 경우 제거
+        for(int i = 0;i<s.size();i++){
+            if(s[i] == temp.back()){
+                // 현재 문자와 이전 문자 비교시 같은 경우 이전 문제 제거 및 현재 문자 저장X            
+                temp.pop_back();
+                erase_flag = 1;
+            }          
+            else{
+                // 아닌 경우 임시 변수에 저장
+                temp.push_back(s[i]);
+            }    
+        }
+        
+        s = temp;
+        temp = "";
+    }
+    
+    // 모든 알파벳을 없앨 수 있는 경우
+    if(s == ""){
+        answer = 1;
+    }
+    
+    return answer;
+}

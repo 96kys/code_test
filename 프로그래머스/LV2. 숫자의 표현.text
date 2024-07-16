@@ -1,0 +1,35 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int n) {
+    int answer = 0;
+    
+    // 연속한 자연수 시작지점
+    int start_num = 0;
+    
+    while(start_num <= n){
+        // 연속수를 더할 변수 선운
+        int sum = 0;
+        
+        // 연속한 자연수 시작점 1씩 증가 하면서 확인
+        start_num++;
+        
+        // 연속한 자연수 더하며 n과 같은지 확인
+        for(int i = start_num;i<=n;i++){
+            sum += i;
+            if(sum == n){
+                answer++;
+                break;
+            }
+            else if(sum > n){
+                break;
+            }
+        }
+        
+        
+    }
+    
+    return answer;
+}

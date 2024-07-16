@@ -1,0 +1,40 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <iostream>
+
+
+using namespace std;
+
+int solution(vector<int> people, int limit) {
+    int answer = 0;
+    
+    // 1. 크기 순으로 정렬한다.
+    sort(people.begin(), people.end());
+    
+    for(int i = 0;i<people.size();i++){
+        // 2. 혼자 남은 경우와 아닌 경우를 구분해준다.
+        if(i != people.size() - 1){          
+            // 3. 여럿이 남은 경우
+            if(people[i] + people[people.size() - 1] > limit){
+                // 가장 작은 몸무게와 가장 큰 몸무게를 가진사람의 합이 limit을 넘는경우 가장 큰 몸무게를 가진사람 혼자 탈출
+                i--;
+                answer++;
+                people.pop_back();     
+            }
+            else{
+                // 가장 작은 몸무게와 가장 큰 몸무게를 가진사람의 합이 limit보다 작은경우 같이 탈출
+                answer++;
+                people.pop_back();     
+            }
+            
+        }
+        else{
+            // 혼자남은경우 혼자 탈출
+            answer++;
+        }
+    }
+    
+    
+    return answer;
+}

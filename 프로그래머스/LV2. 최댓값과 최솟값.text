@@ -1,0 +1,27 @@
+#include <string>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+
+using namespace std;
+
+string solution(string s) {
+    string answer = "";
+    vector<int> s_int;
+    stringstream ss(s);
+    string word;
+    
+    // 공백 기준 분리
+    while (getline(ss, word, ' ')){
+        s_int.push_back(stoi(word));
+    }
+    
+    
+    // 공백 기준 분리된 숫자를 정렬
+    sort(s_int.begin(), s_int.end());
+    
+    // answer에 기록
+    answer = to_string(s_int.front()) + " " + to_string(s_int.back());
+    
+    return answer;
+}

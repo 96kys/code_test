@@ -1,0 +1,52 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(string s) {
+    int answer = 0;
+    string temp = "";
+    vector<int>str_cnt(3, 0);// () [] {} 순서대로
+    
+    // x칸씩 왼쪽으로 이동시키는 for문
+    for(int i = 0;i<s.size();i++){
+        
+        // s문자열이 올바른 괄호 문자열인지 확인
+        for(int j = 0;j<s.size();j++){
+            // 현재 괄호가 ex)   ')'일때 이전 열림 괄호가 '(' 인경우, 즉 정상적인 경우
+            if(s[j] == ')' && temp.back() == '('){
+                temp.pop_back();
+            }
+            else if(s[j] == ']' && temp.back() == '['){
+                temp.pop_back();
+            }
+            else if(s[j] == '}' && temp.back() == '{'){
+                temp.pop_back();
+            }
+            // 열린 괄호인 경우 temp에 저장
+            else if(s[j] == '(' || s[j] == '[' || s[j] == '{'){
+                temp.push_back(s[j]);
+            }
+            else{
+                // 닫힌 괄호가 가장 최근에 열린괄호와 다른 경우
+                break;
+            }
+            
+            // 모든 문자열을 탐색 하였을 때 열린괄호와 닫힌 괄호가 올바르게 된경우
+            if(j == s.size() - 1 && temp == ""){
+                answer++;
+            }
+            
+        }
+        
+        //초기화
+        temp = "";
+        
+        
+        s.push_back(s[0]);
+        s.erase(0, 1);
+    }
+    
+    
+    return answer;
+}

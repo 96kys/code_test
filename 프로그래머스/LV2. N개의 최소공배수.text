@@ -1,0 +1,19 @@
+#include <string>
+#include <vector>
+#include <numeric>
+
+using namespace std;
+
+int solution(vector<int> arr) {
+    int answer = 0;
+    
+    int result = arr[0]; // 최소공배수 계산
+    
+    for(int i = 1;i<arr.size();i++){
+        result = lcm(result, arr[i]);
+    }
+    
+    answer = result;
+    
+    return answer;
+}

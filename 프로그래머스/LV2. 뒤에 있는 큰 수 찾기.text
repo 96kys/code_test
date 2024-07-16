@@ -1,0 +1,39 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(vector<int> numbers) {
+    vector<int> temp_answer;
+    vector<int> answer;
+    vector<int> buffer;
+    
+    buffer.push_back(numbers[numbers.size() - 1]);
+        
+    for(int i = numbers.size() - 1;i >= 0;i--){
+        
+        while(1){
+            int temp_num = buffer.back();
+            
+            if(temp_num > numbers[i]){
+                temp_answer.push_back(temp_num);
+                buffer.push_back(numbers[i]);
+                break;
+            }
+            
+            buffer.pop_back();
+            if(buffer.empty()){
+                temp_answer.push_back(-1);
+                buffer.push_back(numbers[i]);
+                break;
+            }            
+        }        
+    }
+    
+    for(int i = temp_answer.size() - 1;i >= 0;i--){
+        answer.push_back(temp_answer[i]);
+    }
+    
+    
+    return answer;
+}

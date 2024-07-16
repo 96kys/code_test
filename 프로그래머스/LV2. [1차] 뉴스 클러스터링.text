@@ -1,0 +1,66 @@
+#include <string>
+#include <map>
+#include <iostream>
+using namespace std;
+
+int solution(string str1, string str2) {
+    int answer = 0;
+    double total_cnt = 0;
+    double same_cnt = 0;
+    map<string, int> str1_map;
+    map<string, int> str2_map;
+    
+    
+    // 알파벳의 경우 소문자로 변경
+    for(int i = 0;i<str1.size();i++){
+        if(str1[i]>='A' && str1[i]<='Z'){
+            str1[i] = (tolower(str1[i]));
+        }
+    }    
+    for(int i = 0;i<str2.size();i++){
+        if(str2[i]>='A' && str2[i]<='Z'){
+            str2[i] = (tolower(str2[i]));
+        }
+    }
+            
+    // map 구성
+    for(int i = 0;i<str1.size() - 1;i++){
+        if((str1[i]>='a' && str1[i]<='z') && (str1[i + 1]>='a' && str1[i + 1]<='z')){
+            string temp = "";
+            temp += str1[i];
+            temp += str1[i + 1];
+            str1_map[temp]++;   
+        }     
+    }    
+    for(int i = 0;i<str2.size() - 1;i++){
+        if((str2[i]>='a' && str2[i]<='z') && (str2[i + 1]>='a' && str2[i + 1]<='z')){
+            string temp = "";
+            temp += str2[i];
+            temp += str2[i + 1];
+            str2_map[temp]++;   
+        }          
+    }
+    
+    // map을 확인하며 공집합과 합집합 계산
+    for(auto iter = str1_map.begin(); iter != str1_map.end();iter++){
+        same_cnt += min(iter->second, str2_map[iter->first]);
+        total_cnt += max(iter->second, str2_map[iter->first]);
+    }
+    
+    for(auto iter = str2_map.begin(); iter != str2_map.end();iter++){
+        if(str1_map[iter->first] == 0){
+            total_cnt += iter->second;
+        }
+    }
+
+    // 합집합이 없는 경우에 대한 예외처리 및 answer 계산
+    if(total_cnt == 0){
+        answer = 65536;
+    }
+    else{
+        answer = (same_cnt / total_cnt) * 65536;
+    }   
+    
+    
+    return answer;
+}

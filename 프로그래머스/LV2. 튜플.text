@@ -1,0 +1,56 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <utility>
+#include <algorithm>
+
+using namespace std;
+
+
+bool compare(pair<int, int>& a, pair<int, int>& b){
+    // value 즉 해당 원소 사용 횟수를 기준으로 내림차순
+    return a.second > b.second;
+}
+
+
+vector<int> solution(string s) {
+    vector<int> answer;
+    vector<int> s_int;
+    map<int, int> s_cnt;
+    vector<pair<int, int>> index_value;
+    string temp = "";
+    
+    // 먼저 숫자를 뽑아 int로 저장
+    for(int i = 0;i<s.size();i++){
+        if(s[i]>= '0' && s[i]<= '9'){
+            temp.push_back(s[i]);
+        }
+        else if(temp != ""){
+            s_int.push_back(stoi(temp));
+            temp = "";
+        }
+    }
+    
+    // map에 원소에 따른 사용 횟수 기록
+    for(int i = 0;i<s_int.size();i++){
+        s_cnt[s_int[i]]++;
+    }
+    
+    // value값을 기준으로 정렬하기 위해서 pair container에 저장
+    for(auto iter = s_cnt.begin();iter != s_cnt.end();iter++){
+        pair<int, int> p;
+        p.first = iter->first;
+        p.second = iter->second;
+        index_value.push_back(p);
+    }
+    
+    // 사용 빈도 기준 내림차순 정렬
+    sort(index_value.begin(), index_value.end(), compare);
+    
+    // 사용 빈도가 많은 순서로 원소 값 출력
+    for(int i = 0;i<index_value.size();i++){
+        answer.push_back(index_value[i].first);
+    }
+    
+    return answer;
+}

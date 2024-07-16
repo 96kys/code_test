@@ -1,0 +1,68 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <utility>
+
+using namespace std;
+
+int solution(vector<int> priorities, int location) {
+    int answer = 0;
+    map<int, int>priorities_cnt;// <priority, cnt>
+    vector<pair<int, int>> priorities_index;// <priority, index>
+    vector<int> sequence;
+        
+    // 1. map에 priorities의 갯수를 저장
+    for(int i = 0;i<priorities.size();i++){
+        priorities_cnt[priorities[i]]++;
+    }
+    
+    
+    // 2. pair로 index 와 priority값을 가진 배열 구성
+    for(int i = 0;i<priorities.size();i++){
+        pair<int, int> temp;
+        temp.first = priorities[i]; // priority
+        temp.second = i; // index
+        priorities_index.push_back(temp);
+    }
+    
+    
+    auto iter_end = priorities_cnt.end();
+    auto iter_begin = priorities_cnt.begin();
+    
+    // 3. 가장 높은 priority를 가진 값이 있다면 추출(가장 높은 priority는 1.에서 구성한 map활용)
+    while(1){
+        
+        // 4. 가장 높은 priority를 매번 갱신해가며 확인
+        if(iter_end->second == 0){
+            if(iter_end == iter_begin){
+                break;
+            }
+            else{
+                iter_end--;
+            }
+        }
+        
+        
+        if(priorities_index[0].first == iter_end->first){
+            sequence.push_back(priorities_index[0].second);
+            priorities_index.erase(priorities_index.begin());
+            iter_end->second--;
+        }
+        else{
+            priorities_index.push_back(priorities_index[0]);
+            priorities_index.erase(priorities_index.begin());
+        }
+    }
+    
+    
+    // 인덱스를 요소값으로 가진 프로세서 작동 순서 배열을 확인
+    for(int i = 0;i<sequence.size();i++){
+        // sequence배열의 배열 순서가 프로세서 작동 순서임
+        if(location == sequence[i]){
+            answer = i + 1;
+        }
+    }
+    
+    
+    return answer;
+}

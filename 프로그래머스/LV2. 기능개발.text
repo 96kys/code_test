@@ -1,0 +1,49 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+vector<int> solution(vector<int> progresses, vector<int> speeds) {
+    vector<int> answer;
+    int need_pro = progresses.size();
+    
+    while(need_pro != 0){
+        int temp = 0;
+        
+        // 하루 마다 개발 진행상황 갱신
+        for(int i = 0;i<progresses.size();i++){
+            if(progresses[i] < 100){
+                progresses[i] += speeds[i];
+            }
+        }
+        
+        // 개발완료 된 상황 확인
+        for(int i = 0;i<progresses.size();i++){
+            if(progresses[i] >= 100){
+                // 개발 완료된 데이터는 진행상황과 개발속도에 대한 데이터 제거
+                progresses.erase(progresses.begin() + i);
+                speeds.erase(speeds.begin() + i);
+                
+                // 제거에 따른 i 처리
+                i--;
+                
+                // 배포
+                temp++;
+                
+                //개발이 필요한 수
+                need_pro--;
+            }
+            else{// 개발이 안되어 있다면 이전꺼 까지만 배포
+                break;
+            }
+        }
+        
+        // 한개 이상 배포한 경우
+        if(temp != 0){            
+            answer.push_back(temp);
+        }
+    }
+    
+    
+    return answer;
+}

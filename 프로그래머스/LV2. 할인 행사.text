@@ -1,0 +1,46 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
+
+using namespace std;
+
+int solution(vector<string> want, vector<int> number, vector<string> discount) {
+    int answer = 0;
+    map<string, int>want_map;
+    map<string, int>temp_map;
+    map<string, int>discount_map;
+    
+    
+    // want_map을 구성해서 구성의 갯수를 기록
+    for(int i = 0;i<want.size();i++){
+        want_map[want[i]] = number[i];
+    }
+    
+    // 1일차에서 마지막날 - 10일 까지 할인 품목을 확인
+    for(int i = 0;i<discount.size() - 9;i++){
+        // 원하는 품목 임시 변수 초기화
+        temp_map = want_map;
+        
+        // 할인 품목에 원하는 품목이 있다면 해당 갯수 감소
+        for(int j = 0;j<10;j++){
+            temp_map[discount[i + j]]--;
+        }
+        
+        for(int j = 0;j<want.size();j++){
+            // 원하는 갯수 품목에 원하는게 있는지 검색
+            if(temp_map[want[j]] > 0){
+                // 아직도 원하는게 있다면 종료
+                break;
+            }
+            
+            // 원하는게 더이상 없는 경우 -> 원하는 품목을 모두 세일 받을 수 있는 날짜. 정답 반환
+            if(j == want.size() - 1){
+                answer++;
+            }
+        }
+    }
+    
+    
+    return answer;
+}

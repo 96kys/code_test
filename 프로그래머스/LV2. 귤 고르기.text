@@ -1,0 +1,37 @@
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+
+using namespace std;
+
+int solution(int k, vector<int> tangerine) {
+    int answer = 0;
+    vector<int> temp;
+    map<int, int> GUL_cnt;
+    
+    // map에 귤 크기에 따른 갯수 저장
+    for(int i = 0;i<tangerine.size();i++){
+        GUL_cnt[tangerine[i]]++;
+    }
+    
+    // 귤갯수를 vector에 저장
+    for (auto i = GUL_cnt.begin() ; i !=  GUL_cnt.end(); i++)
+    {
+        temp.push_back(i->second);
+    }    
+    
+    // 내림차순으로 정렬
+    sort(temp.begin(), temp.end(), greater<int>());
+    
+    // 최소한의 귤 종류 갯수 계산
+    for(int i = 0;i<temp.size();i++){
+        k -= temp[i];
+        if(k <= 0){
+            answer = i + 1;
+            break;
+        }        
+    }
+    
+    return answer;
+}

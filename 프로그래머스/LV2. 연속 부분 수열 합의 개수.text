@@ -1,0 +1,33 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
+
+using namespace std;
+
+int solution(vector<int> elements) {
+    int answer = 0;
+    int temp = 0;
+    
+    // map을 이용해서 중복된 합은 자동으로 필터링 한다.
+    map<int, int>ele_cnt;
+    
+    // 특정 번호를 기준으로 길이가 1~N(모든원소포함)인 연속 부분 수열의 합을 계산한다.
+    for(int i = 0;i<elements.size();i++){
+        for(int j = 0;j<elements.size();j++){
+            int index = i + j;
+            if(index >= elements.size()){
+                index -= elements.size();
+            }
+            temp += elements[index];
+            ele_cnt[temp]++;
+        }
+        temp = 0;
+    }
+    
+    for(auto i = ele_cnt.begin(); i != ele_cnt.end();i++){
+        answer++;
+    }
+
+    return answer;
+}

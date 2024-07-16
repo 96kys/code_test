@@ -1,0 +1,49 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int cacheSize, vector<string> cities) {
+    int answer = 0;
+    vector<string> cache_data;
+    
+    // 대소문자 구분 조건을 해소하기위해 전부 소문자로 변경
+    for(int i = 0;i<cities.size();i++){
+        for(int j = 0;j<cities[i].size();j++){
+            cities[i][j] = tolower(cities[i][j]);
+        }
+    }
+    
+    // cache데이터 크기 만큼 초기화
+    for(int i = 0;i<cacheSize;i++){
+        cache_data.push_back(" ");
+    }
+    
+    // 도시이름과 캐시데이터를 확인하여 비교
+    for(int i = 0;i<cities.size();i++){        
+        for(int j = 0;j<cacheSize;j++){
+            if(cache_data[j] == cities[i]){
+                // 도시이름이 캐시데이터에 있는경우 실행시간 1 증가
+                answer++;
+                // 도시이름과 동일한 캐시데이터를 최신화
+                cache_data.push_back(cache_data[j]);
+                cache_data.erase(cache_data.begin() + j);
+                break;
+            }
+            
+            if(j == cacheSize - 1){
+                // 캐시데이터가 없는경우 해당 도시이름 캐시에 저장 후 가장 오래된 데이터 제거
+                answer += 5;
+                cache_data.push_back(cities[i]);
+                cache_data.erase(cache_data.begin());
+            }
+        }
+    }
+    
+    // 캐시 사이즈가 0인 경우 예외처리
+    if(cacheSize == 0){
+        answer = cities.size() * 5;
+    }
+    
+    return answer;
+}
