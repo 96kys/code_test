@@ -1,0 +1,63 @@
+#include <string>
+#include <vector>
+#include <queue>
+#include <map>
+
+using namespace std;
+
+
+int bfs(int x, int y, int n){
+    int answer = -1;
+    queue<int> q;
+    queue<int> cnt;
+    q.push(x);
+    cnt.push(0);
+    
+    map<int, int> num_reach;
+    
+    while(!q.empty()){
+        int number = q.front();
+        int cnt_num = cnt.front();
+        
+        q.pop();
+        cnt.pop();
+        
+        if(number > y){
+            continue;
+        }
+        else if(number == y){
+            answer = cnt_num;
+            break;
+        }
+        else{
+            if(num_reach[number + n] == 0){
+                num_reach[number + n] = 1;
+                q.push(number + n);
+                cnt.push(cnt_num + 1);
+            }
+
+            if(num_reach[number * 2] == 0){
+                num_reach[number * 2] = 1;
+                q.push(number * 2);
+                cnt.push(cnt_num + 1);
+            }
+
+            if(num_reach[number * 3] == 0){
+                num_reach[number * 3] = 1;
+                q.push(number * 3);
+                cnt.push(cnt_num + 1);   
+            }         
+        }        
+    }   
+    
+    return answer;
+}
+
+int solution(int x, int y, int n) {
+    int answer = 0;
+    
+    answer = bfs(x, y, n);
+    
+    
+    return answer;
+}
