@@ -1,0 +1,31 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+string solution(vector<int> numbers) {
+    string answer = "";
+    vector<string> buffer;
+    vector<string> temp;
+       
+    for(int i = 0;i<numbers.size();i++){
+        buffer.push_back(to_string(numbers[i]));       
+    }
+        
+    sort(buffer.begin(), buffer.end(), [](const string &a, const string &b) {
+        return a + b > b + a;
+    });
+    
+    for(int i = 0;i<buffer.size();i++){
+        answer += buffer[i];
+    }
+    
+    if (answer[0] == '0') {
+        return "0";
+    }
+    
+    
+    return answer;
+}
