@@ -1,0 +1,72 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <iostream>
+
+
+using namespace std;
+
+vector<int> solution(vector<int> fees, vector<string> records) {
+    vector<int> answer;
+    map<int, int> car_state;
+    map<int, int> car_total_time;
+    map<int, int> car_in_time;
+    
+    // 입차와 출차를 기준으로 시간 계산
+    for(int i = 0;i<records.size();i++){
+        int time = 0;
+        time += (records[i][0] - '0') * 10 * 60;
+        time += (records[i][1] - '0') * 60;
+        time += (records[i][3] - '0') * 10;
+        time += (records[i][4] - '0');
+
+        int car_num = 0;
+        string temp_car_num = "";
+        temp_car_num += records[i][6];
+        temp_car_num += records[i][7];
+        temp_car_num += records[i][8];
+        temp_car_num += records[i][9];
+        car_num = stoi(temp_car_num);
+        
+        if(car_state[car_num] == 0){
+            car_state[car_num] = 1;
+            car_in_time[car_num] = time;            
+        }
+        else{
+            car_state[car_num] = 0;
+            car_total_time[car_num] += time - car_in_time[car_num];
+        }        
+    }
+    
+    // 입차는 하였으나 출차 내역이 없는 경우
+    for (auto it = car_state.begin(); it != car_state.end(); ++it) {
+        if(it->second != 0){
+            car_total_time[it->first] += ((23 * 60) + 59) - car_in_time[it->first];
+        }
+    }
+
+    
+    
+    for (auto it = car_total_time.begin(); it != car_total_time.end(); ++it) {
+        if(it->second <= fees[0]){
+            answer.push_back(fees[1]);
+        }
+        else{
+            int over_time = it->second - fees[0];
+            int cal_fee = 0;
+            if(over_time % fees[2] == 0){
+                // 단위시간으로 떨어지는 경우
+                cal_fee = fees[1] + ((over_time / fees[2]) * fees[3]);
+            }
+            else{
+                // 아닌경우
+                cal_fee = fees[1] + ((over_time / fees[2] + 1) * fees[3]);
+            }
+            
+            answer.push_back(cal_fee);
+        }        
+    }
+    
+    
+    return answer;
+}
