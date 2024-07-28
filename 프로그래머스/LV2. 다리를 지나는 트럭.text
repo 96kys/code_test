@@ -1,0 +1,40 @@
+#include <string>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int solution(int bridge_length, int weight, vector<int> truck_weights) {
+    int answer = 0;
+    int total_weight = 0;
+    int index = 0;
+    queue<int> bridge;
+    
+    for(int i = 0;i<bridge_length;i++){
+        bridge.push(0);
+    }
+    
+    while(truck_weights.back() != 0){
+        // 횟수 count
+        answer++;
+        
+        // 도착한 트럭 무게 빼기
+        total_weight -= bridge.front();
+        bridge.pop();
+        
+        // 총 무게를 확인하고 트럭을 넣을 수 있는지 확인
+        if((total_weight + truck_weights[index]) <= weight){
+            bridge.push(truck_weights[index]);
+            total_weight += truck_weights[index];
+            truck_weights[index] = 0;
+            index++;
+        }
+        else{
+            bridge.push(0);
+        }        
+    }
+    
+    answer += bridge_length;
+    
+    return answer;
+}
