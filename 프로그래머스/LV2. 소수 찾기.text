@@ -1,0 +1,58 @@
+#include <string>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+
+map<int, int> number;
+
+void make_num(string arr, int l, int r) {
+    if (l == r - 1) {
+        number[stoi(arr)] = 1;
+    } else {
+        for (int i = l; i < r; i++) {
+            swap(arr[l], arr[i]);
+            make_num(arr, l + 1, r);
+            swap(arr[l], arr[i]);
+        }
+    }
+}
+
+void generate_combinations(const string &numbers, string current, int index) {
+    if (!current.empty()) {
+        make_num(current, 0, current.size());
+    }
+    for (int i = index; i < numbers.size(); i++) {
+        current += numbers[i];
+        generate_combinations(numbers, current, i + 1);
+        current.pop_back();
+    }
+}
+
+int solution(string numbers) {
+    int answer = 0;   
+    number.clear();    
+    vector<bool> is_prime(10000000, true);
+    
+    is_prime[0] = is_prime[1] = false;
+    for (int i = 2; i < 10000000; i++) {
+        if (is_prime[i]) {
+            for (int j = i * 2; j < 10000000; j += i) {
+                is_prime[j] = false;
+            }
+        }
+    }
+    
+    generate_combinations(numbers, "", 0);
+    
+    for (auto iter = number.begin(); iter != number.end(); iter++) {
+        if (is_prime[iter->first]) {
+            answer++;
+        }
+    }
+    
+    return answer;
+} 
