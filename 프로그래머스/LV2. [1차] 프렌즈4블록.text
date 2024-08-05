@@ -1,0 +1,65 @@
+#include <string>
+#include <vector>
+#include <iostream>
+using namespace std;
+
+int solution(int m, int n, vector<string> board) {
+    int answer = 0;
+    int buffer = 0;
+    vector<vector<int>> erase(m, vector<int>(n, 1));
+    
+    while(1){    
+        buffer = answer;
+        // 우 하 우하
+        int dr[3] = {0, 1, 1};
+        int dc[3] = {1, 0, 1};
+
+        // 2*2같은경우 확인
+        for(int row = 0;row<m-1;row++){
+            for(int col = 0;col<n-1;col++){
+                // 빈 공간인 경우 스킵
+                if(board[row][col] == NULL){
+                    continue;
+                }
+
+                char temp = board[row][col];
+                for(int dir = 0;dir<3;dir++){
+                    if(temp != board[row + dr[dir]][col + dc[dir]]){
+                        break;
+                    }
+
+                    if(dir == 2){
+                        erase[row][col] = 0;
+                        erase[row + dr[0]][col + dc[0]] = 0;
+                        erase[row + dr[1]][col + dc[1]] = 0;
+                        erase[row + dr[2]][col + dc[2]] = 0;
+                    }
+                }
+            }
+        }
+
+        // 제거 및 점수 추가
+        for(int row = 0;row<m;row++){
+            for(int col = 0;col<n;col++){
+                if(erase[row][col] == 0){  
+                    board[row][col] = NULL;
+                    erase[row][col] = 1;
+                    answer++;
+
+                    int temp_row = row;
+                    while(temp_row > 0){
+                        board[temp_row][col] = board[temp_row -1][col];
+                        temp_row--;
+                    }
+                    board[0][col] = NULL;                
+                }
+            }
+        }        
+        
+        if(answer == buffer){
+            break;
+        }
+    }
+    
+    return answer;
+}
