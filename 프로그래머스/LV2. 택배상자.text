@@ -1,0 +1,61 @@
+#include <string>
+#include <vector>
+#include <queue>
+#include <iostream>
+
+using namespace std;
+
+int solution(vector<int> order) {
+    int answer = 0;
+    int order_cnt = 0;
+    
+    queue<int> main_tr;
+    vector<int> sub_tr;
+        
+    // 번호 순서대로 메인에 입력
+    for(int i = 1;i <= order.size();i++){
+        main_tr.push(i);
+    }
+    
+    while(!main_tr.empty()){
+        // 메인 벨트에 있는 택배가 없어질 때 까지 빼내면서 시행
+        int num = main_tr.front();
+        
+        
+        if(order[order_cnt] == num){
+            // 메인벨트에 있는 번호가 주문순서에 맞는 경우
+            main_tr.pop();
+            answer++;
+            order_cnt++;
+        }
+        else if(sub_tr.size() > 0 && order[order_cnt] == sub_tr.back()){
+            // 보조벨트에 마지막 번호가 주문순서에 맞는 경우
+            answer++;
+            order_cnt++;
+            sub_tr.pop_back();
+        }
+        else{
+            // 메인, 보조 둘다 주문순서에 안맞는 경우
+            main_tr.pop();
+            sub_tr.push_back(num);
+        }
+        
+    }
+    
+    while(!sub_tr.empty()){
+        // 서브 벨트에 있는 마지막 택배를 확인
+        if(order[order_cnt] == sub_tr.back()){
+            answer++;
+            order_cnt++;
+            sub_tr.pop_back();
+        }
+        else{
+            break;
+        }
+        
+    }
+    
+    
+    
+    return answer;
+}
